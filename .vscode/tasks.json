@@ -1,0 +1,33 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build all task run",
+            "type": "shell",
+            "command": "make all iso run",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "make clean"
+        },
+        {
+            "label": "build all task no run",
+            "type": "shell",
+            "command": "make all iso",
+            "group": "build"
+        },
+        {
+            "label": "build format",
+            "type": "shell",
+            "command": "make format",
+            "group": "build"
+        }
+    ],
+}
