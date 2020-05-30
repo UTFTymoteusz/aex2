@@ -1,3 +1,7 @@
+format:
+	cd coremod && $(MAKE) format
+	cd kernel && $(MAKE) format
+
 all:
 	cd coremod && $(MAKE) all COPY_DIR="$(shell pwd)/kernel/bin/grubiso/sys/core/"
 	cd kernel && $(MAKE) all
