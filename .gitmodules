@@ -1,0 +1,3 @@
+[submodule "kernel"]
+	path = kernel
+	url = git@github.com:UTFTymoteusz/aexkernel2.git
