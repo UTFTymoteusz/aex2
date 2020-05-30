@@ -7,10 +7,8 @@ using namespace AEX;
 const char* MODULE_NAME = "testmod";
 
 void annoying_a() {
-    while (true) {
-        printk("amma keep annoying you\n");
-        Proc::Thread::sleep(2500);
-    }
+    printk("i literally have no idea what to do so i'll just exit\n");
+    Proc::Thread::sleep(2500);
 }
 
 void module_enter() {
@@ -20,7 +18,6 @@ void module_enter() {
     thread->start();
 
     printk(PRINTK_WARN "testmod: Loaded\n");
-    printk(PRINTK_WARN "testmod: Loaded 2\n");
 }
 
 void module_exit() {
