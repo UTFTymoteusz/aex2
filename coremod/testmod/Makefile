@@ -1,24 +1,19 @@
 MODULE_NAME = testmod
 
 CC = g++
-AS = nasm
 LD = ld
 
 MKDIR = mkdir -p
 
 BIN  := bin/
-BOOT := boot/
 DEP_DEST := $(BIN)dep/
 OBJ_DEST := $(BIN)obj/
 
 CFILES    := $(shell find . -type f -name '*.cpp')
 HFILES    := $(shell find . -type f -name '*.hpp')
-ASMFILES  := $(shell find . -type f -name '*.asm')
-OBJS      := $(patsubst %.o, $(OBJ_DEST)%.o, $(CFILES:.cpp=.cpp.o) $(ASMFILES:.asm=.asm.o))
+OBJS      := $(patsubst %.o, $(OBJ_DEST)%.o, $(CFILES:.cpp=.cpp.o))
 
 OBJS := $(OBJS)
-
-ARCH = arch/x64/
 
 GFLAGS = -O2 -Wall -Wextra -nostdlib -pipe
 
@@ -65,7 +60,3 @@ $(OBJ_DEST)%.cpp.o : %.cpp
 	@$(MKDIR) ${@D}
 	@$(MKDIR) $(dir $(DEP_DEST)$*)
 	$(CC) $(CCFLAGS) -c $< -o $@ -MMD -MT $@ -MF $(DEP_DEST)$*.cpp.d
-
-$(OBJ_DEST)%.asm.o : %.asm
-	@$(MKDIR) ${@D}
-	$(AS) $(ASFLAGS) $< -o $@

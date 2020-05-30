@@ -4,8 +4,6 @@
 
 using namespace AEX;
 
-volatile int bong = 2;
-
 const char* MODULE_NAME = "testmod";
 
 void annoying_a() {
@@ -16,8 +14,6 @@ void annoying_a() {
 }
 
 void module_enter() {
-    bong++;
-
     auto thread = new Proc::Thread(nullptr, (void*) annoying_a, VMem::kernel_pagemap->alloc(8192),
                                    8192, VMem::kernel_pagemap);
 
