@@ -16,3 +16,7 @@ run:
 clean:
 	cd coremod && $(MAKE) clean
 	cd kernel && $(MAKE) clean
+
+gitsetup:
+	git submodule init
+	git submodule update
