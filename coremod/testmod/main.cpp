@@ -2,12 +2,13 @@
 #include "aex/printk.hpp"
 #include "aex/proc/thread.hpp"
 
+
 using namespace AEX;
 
 const char* MODULE_NAME = "testmod";
 
 void annoying_a() {
-    printk("i literally have no idea what to do so i'll just exit\n");
+    // printk("i literally have no idea what to do so i'll just exit\n");
     Proc::Thread::sleep(2500);
 }
 

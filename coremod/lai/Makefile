@@ -1,5 +1,7 @@
-MODULE_NAME  = testmod
+MODULE_NAME  = lai
 MODULE_ORDER = 00
+
+LAI_CC = gcc
 
 CC = g++
 LD = ld
@@ -10,18 +12,38 @@ BIN  := bin/
 DEP_DEST := $(BIN)dep/
 OBJ_DEST := $(BIN)obj/
 
+LAI_CFILES := $(shell find ./lai/ -type f -name '*.c')
+LAI_HFILES := $(shell find ./lai/ -type f -name '*.h')
+LAI_OBJS   := $(patsubst %.o, $(OBJ_DEST)%.o, $(LAI_CFILES:.c=.c.o))
+
 CFILES    := $(shell find . -type f -name '*.cpp')
 HFILES    := $(shell find . -type f -name '*.hpp')
 OBJS      := $(patsubst %.o, $(OBJ_DEST)%.o, $(CFILES:.cpp=.cpp.o))
 
-OBJS := $(OBJS)
+OBJS := $(OBJS) $(LAI_OBJS)
 
 MODULE_OBJ = $(BIN)$(MODULE_NAME).$(MODULE_ORDER).km
 
 GFLAGS = -O2 -Wall -Wextra -nostdlib -pipe
 
+LAI_INCLUDES := -I. -I./lai/include
+
 INCLUDES := -I. -I$(ARCH) -Iinclude/ -I../../kernel/include \
-		    -I../../kernel/arch/x64/include
+		    -I../../kernel/arch/x64/include -I./lai/include
+
+LAI_CCFLAGS := $(GFLAGS) \
+	-lgcc      \
+	-std=gnu99 \
+	-ffreestanding  \
+	-masm=intel     \
+	-mcmodel=kernel \
+	-mno-sse  \
+	-mno-sse2 \
+	-mno-red-zone   \
+	-fno-pic        \
+	-fno-stack-protector    \
+	-fno-omit-frame-pointer \
+	$(LAI_INCLUDES)
 
 CCFLAGS := $(GFLAGS) \
 	-lgcc      \
@@ -30,13 +52,13 @@ CCFLAGS := $(GFLAGS) \
 	-ffreestanding  \
 	-masm=intel     \
 	-mcmodel=kernel \
+	-mno-sse  \
+	-mno-sse2 \
 	-mno-red-zone   \
 	-fno-pic        \
 	-fno-stack-protector    \
 	-fno-omit-frame-pointer \
 	$(INCLUDES)
-
-ASFLAGS := -felf64
 
 LDFLAGS := $(GFLAGS) \
 	-ffreestanding \
@@ -48,6 +70,7 @@ format:
 	clang-format -style=file -i ${CFILES} ${HFILES}
 
 all: $(OBJS)
+	echo $(OBJS)
 	@$(MKDIR) $(BIN)
 	@$(LD) -r -o $(MODULE_OBJ) $(OBJS)
 
@@ -63,3 +86,8 @@ $(OBJ_DEST)%.cpp.o : %.cpp
 	@$(MKDIR) ${@D}
 	@$(MKDIR) $(dir $(DEP_DEST)$*)
 	$(CC) $(CCFLAGS) -c $< -o $@ -MMD -MT $@ -MF $(DEP_DEST)$*.cpp.d
+
+$(OBJ_DEST)%.c.o : %.c
+	@$(MKDIR) ${@D}
+	@$(MKDIR) $(dir $(DEP_DEST)$*)
+	$(LAI_CC) $(LAI_CCFLAGS) -c $< -o $@ -MMD -MT $@ -MF $(DEP_DEST)$*.c.d

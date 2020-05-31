@@ -3,8 +3,8 @@ format:
 	clang-format -style=file -i ${CFILES} ${HFILES}
 	
 all:
-	cd testmod && $(MAKE) all
-	cd testmod && $(MAKE) copy COPY_DIR="$(COPY_DIR)"
+	$(foreach dir, $(wildcard */), cd $(dir) && $(MAKE) all && cd ..;)
+	$(foreach dir, $(wildcard */), cd $(dir) && $(MAKE) copy COPY_DIR="$(COPY_DIR)" && cd ..;)
 
 clean:
-	cd testmod && $(MAKE) clean
+	$(foreach dir, $(wildcard */), cd $(dir) && $(MAKE) clean && cd ..;)

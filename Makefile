@@ -4,6 +4,7 @@ format:
 
 all:
 	mkdir -p "$(shell pwd)/kernel/bin/grubiso/sys/core/"
+	
 	cd coremod && $(MAKE) all COPY_DIR="$(shell pwd)/kernel/bin/grubiso/sys/core/"
 	cd kernel && $(MAKE) all
 
@@ -17,6 +18,6 @@ clean:
 	cd coremod && $(MAKE) clean
 	cd kernel && $(MAKE) clean
 
-gitsetup:
+git:
 	git submodule init
 	git submodule update

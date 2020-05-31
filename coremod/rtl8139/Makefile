@@ -1,5 +1,5 @@
-MODULE_NAME  = testmod
-MODULE_ORDER = 00
+MODULE_NAME  = rtl8139
+MODULE_ORDER = 10
 
 CC = g++
 LD = ld
