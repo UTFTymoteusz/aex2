@@ -37,8 +37,6 @@ LAI_CCFLAGS := $(GFLAGS) \
 	-ffreestanding  \
 	-masm=intel     \
 	-mcmodel=kernel \
-	-mno-sse  \
-	-mno-sse2 \
 	-mno-red-zone   \
 	-fno-pic        \
 	-fno-stack-protector    \
@@ -52,8 +50,6 @@ CCFLAGS := $(GFLAGS) \
 	-ffreestanding  \
 	-masm=intel     \
 	-mcmodel=kernel \
-	-mno-sse  \
-	-mno-sse2 \
 	-mno-red-zone   \
 	-fno-pic        \
 	-fno-stack-protector    \

@@ -58,22 +58,18 @@ extern "C" void laihost_panic(const char* msg) {
 
 
 extern "C" void* laihost_malloc(size_t size) {
-    //printk("malloc(%i)\n", size);
     return Heap::malloc(size);
 }
 
 extern "C" void* laihost_realloc(void* ptr, size_t size) {
-    //printk("realloc(0x%p, %i)\n", ptr, size);
     return Heap::realloc(ptr, size);
 }
 
 extern "C" void laihost_free(void* ptr) {
-    //printk("free(0x%p)\n", ptr);
     Heap::free(ptr);
 }
 
 extern "C" void* laihost_map(size_t addr, size_t count) {
-    printk("map(0x%p, %i)\n", addr, count);
     return VMem::kernel_pagemap->map(count, addr, PAGE_WRITE);
 }
 
@@ -83,10 +79,7 @@ extern "C" void laihost_unmap(void* ptr, size_t count) {
 
 
 extern "C" void* laihost_scan(const char* sig, size_t index) {
-    auto aaa = ACPI::find_table(sig, index);
-
-    printk("scan(%c%c%c%c, %i) = 0x%p\n", sig[0], sig[1], sig[2], sig[3], index, aaa);
-    return aaa;
+    return ACPI::find_table(sig, index);
 }
 
 
@@ -150,9 +143,4 @@ extern "C" void laihost_handle_amldebug(lai_variable_t*) {}
 
 extern "C" void laihost_sleep(uint64_t ms) {
     Proc::Thread::sleep(ms);
-}
-
-
-extern "C" void laihost_print_pointer(void* ptr) {
-    printk("xd: 0x%p\n", ptr);
 }
