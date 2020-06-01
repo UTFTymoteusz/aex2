@@ -1,5 +1,5 @@
 MODULE_NAME  = testmod
-MODULE_ORDER = 00
+MODULE_ORDER = 01
 
 CC = g++
 LD = ld

@@ -1,5 +1,4 @@
 format:
-	@$(MKDIR) $(BIN)
 	clang-format -style=file -i ${CFILES} ${HFILES}
 	
 all:

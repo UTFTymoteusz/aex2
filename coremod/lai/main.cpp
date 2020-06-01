@@ -10,11 +10,11 @@
 
 #include "lai/core.h"
 #include "lai/helpers/sci.h"
+#include "lai/helpers/pm.h"
 #include "lai/host.h"
 
 #include <stddef.h>
 #include <stdint.h>
-
 
 
 using namespace AEX;
@@ -22,10 +22,12 @@ using namespace AEX;
 const char* MODULE_NAME = "lai";
 
 void module_enter() {
+    printk("lai: ACPI revision 0x%02x\n", ACPI::revision);
+
     lai_set_acpi_revision(ACPI::revision);
     lai_create_namespace();
 
-    lai_enable_acpi(1);
+    lai_enable_acpi(1);   
 }
 
 void module_exit() {}
@@ -56,23 +58,23 @@ extern "C" void laihost_panic(const char* msg) {
 
 
 extern "C" void* laihost_malloc(size_t size) {
-    printk("malloc(%i)\n", size);
+    //printk("malloc(%i)\n", size);
     return Heap::malloc(size);
 }
 
 extern "C" void* laihost_realloc(void* ptr, size_t size) {
-    printk("realloc(0x%p, %i)\n", ptr, size);
+    //printk("realloc(0x%p, %i)\n", ptr, size);
     return Heap::realloc(ptr, size);
 }
 
 extern "C" void laihost_free(void* ptr) {
-    printk("free(0x%p)\n", ptr);
+    //printk("free(0x%p)\n", ptr);
     Heap::free(ptr);
 }
 
 extern "C" void* laihost_map(size_t addr, size_t count) {
     printk("map(0x%p, %i)\n", addr, count);
-    return VMem::kernel_pagemap->map(addr, addr, PAGE_WRITE);
+    return VMem::kernel_pagemap->map(count, addr, PAGE_WRITE);
 }
 
 extern "C" void laihost_unmap(void* ptr, size_t count) {
@@ -148,4 +150,9 @@ extern "C" void laihost_handle_amldebug(lai_variable_t*) {}
 
 extern "C" void laihost_sleep(uint64_t ms) {
     Proc::Thread::sleep(ms);
+}
+
+
+extern "C" void laihost_print_pointer(void* ptr) {
+    printk("xd: 0x%p\n", ptr);
 }
