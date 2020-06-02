@@ -9,8 +9,8 @@
 #include "aex/string.hpp"
 
 #include "lai/core.h"
-#include "lai/helpers/sci.h"
 #include "lai/helpers/pm.h"
+#include "lai/helpers/sci.h"
 #include "lai/host.h"
 
 #include <stddef.h>
@@ -27,7 +27,7 @@ void module_enter() {
     lai_set_acpi_revision(ACPI::revision);
     lai_create_namespace();
 
-    lai_enable_acpi(1);   
+    lai_enable_acpi(1);
 }
 
 void module_exit() {}
@@ -48,7 +48,7 @@ extern "C" int memcmp(const void* a, const void* b, size_t len) {
 }
 
 
-extern "C" void laihost_log(int level, const char* msg) {
+extern "C" void laihost_log(int, const char* msg) {
     printk("lai: %s\n", msg);
 }
 
@@ -73,7 +73,7 @@ extern "C" void* laihost_map(size_t addr, size_t count) {
     return VMem::kernel_pagemap->map(count, addr, PAGE_WRITE);
 }
 
-extern "C" void laihost_unmap(void* ptr, size_t count) {
+extern "C" void laihost_unmap(void*, size_t) {
     printk("implement paging unmap pls\n");
 }
 
@@ -123,17 +123,17 @@ extern "C" void laihost_pci_writed(uint16_t, uint8_t bus, uint8_t slot, uint8_t 
     Dev::PCI::write_dword(bus, slot, fun, offset, val);
 }
 
-extern "C" uint8_t laihost_pci_readb(uint16_t seg, uint8_t bus, uint8_t slot, uint8_t fun,
+extern "C" uint8_t laihost_pci_readb(uint16_t, uint8_t bus, uint8_t slot, uint8_t fun,
                                      uint16_t offset) {
     return Dev::PCI::read_byte(bus, slot, fun, offset);
 }
 
-extern "C" uint16_t laihost_pci_readw(uint16_t seg, uint8_t bus, uint8_t slot, uint8_t fun,
+extern "C" uint16_t laihost_pci_readw(uint16_t, uint8_t bus, uint8_t slot, uint8_t fun,
                                       uint16_t offset) {
     return Dev::PCI::read_word(bus, slot, fun, offset);
 }
 
-extern "C" uint32_t laihost_pci_readd(uint16_t seg, uint8_t bus, uint8_t slot, uint8_t fun,
+extern "C" uint32_t laihost_pci_readd(uint16_t, uint8_t bus, uint8_t slot, uint8_t fun,
                                       uint16_t offset) {
     return Dev::PCI::read_dword(bus, slot, fun, offset);
 }
