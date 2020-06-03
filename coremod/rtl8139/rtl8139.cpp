@@ -6,6 +6,7 @@
 #include "aex/dev/tree/tree.hpp"
 #include "aex/math.hpp"
 #include "aex/mem/vmem.hpp"
+#include "aex/net/ipv4.hpp"
 #include "aex/printk.hpp"
 #include "aex/proc/thread.hpp"
 #include "aex/sys/irq.hpp"
@@ -84,13 +85,13 @@ class RTL8139 : public Dev::Net {
         }
 
         for (int i = 0; i < 6; i++)
-            _mac[i] = CPU::inportb(_io_base + i);
+            ethernet_mac[i] = CPU::inportb(_io_base + i);
 
         _irq = device->getIRQ();
 
         printk("rtl8139: %s: irq %i\n", name, _irq);
-        printk("rtl8139: %s: mac %02X:%02X:%02X:%02X:%02X:%02X\n", name, _mac[0], _mac[1], _mac[2],
-               _mac[3], _mac[4], _mac[5]);
+        printk("rtl8139: %s: mac %02X:%02X:%02X:%02X:%02X:%02X\n", name, ethernet_mac[0],
+               ethernet_mac[1], ethernet_mac[2], ethernet_mac[3], ethernet_mac[4], ethernet_mac[5]);
 
         // Power on
         CPU::outportb(_io_base + CONFIG_1, 0x00);
@@ -161,8 +162,6 @@ class RTL8139 : public Dev::Net {
         uint16_t len;
     } __attribute((packed));
 
-    uint8_t _mac[6];
-
     uint32_t _io_base;
 
     uint8_t* _tx_buffers = nullptr;
@@ -213,7 +212,7 @@ class RTL8139 : public Dev::Net {
 
             uint16_t frame_len = frame->len;
 
-            receive(&_rx_buffer[_rx_buffer_pos], frame_len);
+            receive(&_rx_buffer[_rx_buffer_pos + 4], frame_len);
 
             _rx_buffer_pos = (_rx_buffer_pos + (frame_len + 4 + 3)) & BUFFER_MASK;
 
@@ -249,6 +248,13 @@ class RTL8139Driver : public Tree::Driver {
 
         auto rtl            = new RTL8139(pci_device, buffer);
         device->driver_data = rtl;
+
+        if (!rtl->registerDevice())
+            printk(PRINTK_WARN "rtl8139: %s: Failed to register\n", rtl->name);
+
+        uint8_t addr_bytes[4] = {169, 254, 163, 201};
+
+        rtl->ipv4_addr = AEX::Net::ipv4_addr(addr_bytes);
     }
 
   private:
