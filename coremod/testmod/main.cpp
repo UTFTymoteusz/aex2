@@ -1,7 +1,14 @@
+#include "aex/fs/file.hpp"
 #include "aex/mem/heap.hpp"
 #include "aex/printk.hpp"
+#include "aex/proc/proc.hpp"
 #include "aex/proc/thread.hpp"
+#include "aex/tty.hpp"
 
+
+// clang-format off
+#include "aex/arch/sys/cpu.hpp"
+// clang-format on
 
 using namespace AEX;
 

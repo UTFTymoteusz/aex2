@@ -4,11 +4,13 @@
 #include "aex/kpanic.hpp"
 #include "aex/mem/heap.hpp"
 #include "aex/mem/vmem.hpp"
+#include "aex/module.hpp"
 #include "aex/printk.hpp"
 #include "aex/proc/thread.hpp"
 #include "aex/string.hpp"
 
 #include "lai/core.h"
+#include "lai/helpers/pci.h"
 #include "lai/helpers/pm.h"
 #include "lai/helpers/sci.h"
 #include "lai/host.h"
@@ -21,6 +23,8 @@ using namespace AEX;
 
 const char* MODULE_NAME = "lai";
 
+uint8_t acpi_set_pci_pin(uint8_t bus, uint8_t device, uint8_t function, uint8_t pin);
+
 void module_enter() {
     printk("lai: ACPI revision 0x%02x\n", ACPI::revision);
 
@@ -28,10 +32,11 @@ void module_enter() {
     lai_create_namespace();
 
     lai_enable_acpi(1);
+
+    register_global_symbol("acpi_set_pci_pin", (void*) acpi_set_pci_pin);
 }
 
 void module_exit() {}
-
 
 extern "C" void* memset(void* mem, int c, size_t len) {
     AEX::memset(mem, c, len);
@@ -143,4 +148,12 @@ extern "C" void laihost_handle_amldebug(lai_variable_t*) {}
 
 extern "C" void laihost_sleep(uint64_t ms) {
     Proc::Thread::sleep(ms);
+}
+
+
+uint8_t acpi_set_pci_pin(uint8_t bus, uint8_t device, uint8_t function, uint8_t pin) {
+    acpi_resource_t aaa;
+    lai_pci_route_pin(&aaa, 0, bus, device, function, pin);
+
+    return aaa.base;
 }
