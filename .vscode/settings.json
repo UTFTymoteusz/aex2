@@ -9,5 +9,6 @@
         "type_traits": "cpp",
         "typeinfo": "cpp",
         "exception": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }

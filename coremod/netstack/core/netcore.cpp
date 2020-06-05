@@ -11,9 +11,9 @@
 #include "core/packet_buffer.hpp"
 #include "layer/arp.hpp"
 #include "layer/ethernet.hpp"
+#include "layer/ipv4.hpp"
 
 #include <new>
-
 
 namespace AEX::NetProto::NetCore {
     packet_buffer* tx_buffers[64];
@@ -30,6 +30,29 @@ namespace AEX::NetProto::NetCore {
     Spinlock tx_lock, rx_lock;
 
     void send_arp(const void* packet, uint16_t len);
+
+    void tx_packet_handler();
+    void rx_packet_handler();
+
+    void init() {
+        for (size_t i = 0; i < sizeof(tx_buffers) / sizeof(packet_buffer*); i++)
+            tx_buffers[i] = new packet_buffer();
+
+        tx_packet_queue = new Mem::CircularBuffer(65536);
+
+        auto tx_thread = new Proc::Thread(nullptr, (void*) tx_packet_handler, 8192, nullptr);
+
+        tx_handler_thread = tx_thread->getSmartPointer();
+        tx_handler_thread->start();
+
+
+        rx_packet_queue = new Mem::CircularBuffer(65536);
+
+        auto rx_thread = new Proc::Thread(nullptr, (void*) rx_packet_handler, 8192, nullptr);
+
+        rx_handler_thread = rx_thread->getSmartPointer();
+        rx_handler_thread->start();
+    }
 
     packet_buffer* get_tx_buffer() {
         while (true) {
@@ -62,10 +85,10 @@ namespace AEX::NetProto::NetCore {
         tx_lock.release();
     }
 
-    void queue_rx_packet(ethertype_t type, const void* data, uint16_t len) {
+    void queue_rx_packet(int device_id, ethertype_t type, const void* data, uint16_t len) {
         rx_lock.acquire();
 
-        while (rx_packet_queue->writeAvailable() < len + 4) {
+        while (rx_packet_queue->writeAvailable() < len + 8) {
             rx_lock.release();
 
             Proc::Thread::yield();
@@ -73,6 +96,7 @@ namespace AEX::NetProto::NetCore {
             rx_lock.acquire();
         }
 
+        rx_packet_queue->write(&device_id, 4);
         rx_packet_queue->write(&type, 2);
         rx_packet_queue->write(&len, 2);
         rx_packet_queue->write(data, len);
@@ -105,10 +129,10 @@ namespace AEX::NetProto::NetCore {
             tx_lock.release();
 
             switch (type) {
-            case ethertype_t::ARP:
+            case ethertype_t::ETH_ARP:
                 send_arp(buffer, len);
                 break;
-            case ethertype_t::IPv4:
+            case ethertype_t::ETH_IPv4:
                 break;
             default:
                 break;
@@ -129,47 +153,32 @@ namespace AEX::NetProto::NetCore {
             }
 
             ethertype_t type;
+            int         device_id;
             uint16_t    len;
             uint8_t     buffer[2048];
 
+            rx_packet_queue->read(&device_id, 4);
             rx_packet_queue->read(&type, 2);
             rx_packet_queue->read(&len, 2);
             rx_packet_queue->read(buffer, len);
 
             rx_lock.release();
 
+            auto net_dev = Dev::get_net_device(device_id);
+            if (!net_dev.isValid())
+                continue;
+
             switch (type) {
-            case ethertype_t::ARP:
-                ARPLayer::parse(buffer, len);
+            case ethertype_t::ETH_ARP:
+                ARPLayer::parse(net_dev, buffer, len);
                 break;
-            case ethertype_t::IPv4:
+            case ethertype_t::ETH_IPv4:
+                IPv4Layer::parse(net_dev, buffer, len);
                 break;
             default:
                 break;
             }
         }
-    }
-
-    void init() {
-        for (size_t i = 0; i < sizeof(tx_buffers) / sizeof(packet_buffer*); i++)
-            tx_buffers[i] = new packet_buffer();
-
-        tx_packet_queue = new Mem::CircularBuffer(65536);
-
-        auto tx_thread = new Proc::Thread(nullptr, (void*) tx_packet_handler,
-                                          VMem::kernel_pagemap->alloc(8192), 8192, nullptr);
-
-        tx_handler_thread = tx_thread->getSmartPointer();
-        tx_handler_thread->start();
-
-
-        rx_packet_queue = new Mem::CircularBuffer(65536);
-
-        auto rx_thread = new Proc::Thread(nullptr, (void*) rx_packet_handler,
-                                          VMem::kernel_pagemap->alloc(8192), 8192, nullptr);
-
-        rx_handler_thread = rx_thread->getSmartPointer();
-        rx_handler_thread->start();
     }
 
     Mem::SmartPointer<Dev::Net> get_interface(Net::mac_addr mac) {
@@ -196,15 +205,12 @@ namespace AEX::NetProto::NetCore {
             return;
 
         auto dest_mac   = (Net::mac_addr*) ((uint8_t*) packet + sizeof(arp_header) + 10);
-        auto buffer_try = EthernetLayer::encapsulate(*source_mac, *dest_mac, ethertype_t::ARP);
-
+        auto buffer_try = EthernetLayer::encapsulate(*source_mac, *dest_mac, ethertype_t::ETH_ARP);
         if (!buffer_try.has_value)
             return;
 
         auto buffer = buffer_try.value;
-
         memcpy(buffer->alloc(len), packet, len);
-
         net_dev->send(buffer->get(), buffer->length());
 
         buffer->release();

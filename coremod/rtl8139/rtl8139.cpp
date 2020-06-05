@@ -96,7 +96,7 @@ class RTL8139 : public Dev::Net {
         // Power on
         CPU::outportb(_io_base + CONFIG_1, 0x00);
 
-        // Reset
+        // Software reset
         CPU::outportb(_io_base + CMD, CMD_RST);
 
         while (CPU::inportb(_io_base + CMD) & CMD_RST)
@@ -129,7 +129,7 @@ class RTL8139 : public Dev::Net {
         // IMR time
         CPU::outportw(_io_base + IMR, IMR_ROK | IMR_ROV | IMR_FOV);
 
-        printk("rtl8139: %s: Ready\n", name);
+        printk(PRINTK_OK "rtl8139: %s: Ready\n", name);
     }
 
     error_t send(const void* buffer, size_t len) {
@@ -138,7 +138,7 @@ class RTL8139 : public Dev::Net {
 
         auto scopeLock = ScopeSpinlock(_tx_lock);
 
-        len = min(len, 1792);
+        len = min<size_t>(len, 1792);
 
         uint16_t io_port = _io_base + TSD0 + 4 * _current_tx_buffer;
 
@@ -252,9 +252,8 @@ class RTL8139Driver : public Tree::Driver {
         if (!rtl->registerDevice())
             printk(PRINTK_WARN "rtl8139: %s: Failed to register\n", rtl->name);
 
-        uint8_t addr_bytes[4] = {169, 254, 163, 201};
-
-        rtl->ipv4_addr = AEX::Net::ipv4_addr(addr_bytes);
+        rtl->setIPv4Address(AEX::Net::ipv4_addr(169, 254, 163, 201));
+        rtl->setIPv4Mask(AEX::Net::ipv4_addr(255, 255, 0, 0));
     }
 
   private:
@@ -263,8 +262,6 @@ class RTL8139Driver : public Tree::Driver {
 RTL8139Driver* driver = nullptr;
 
 void module_enter() {
-    printk("rtl8139: Module loaded\n");
-
     driver = new RTL8139Driver();
 
     if (!Tree::register_driver("pci", driver)) {

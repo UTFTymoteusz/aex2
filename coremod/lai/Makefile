@@ -32,32 +32,28 @@ INCLUDES := -I. -I$(ARCH) -Iinclude/ -I../../kernel/include \
 		    -I../../kernel/arch/x64/include -I./lai/include
 
 LAI_CCFLAGS := $(GFLAGS) \
-	-lgcc      \
-	-std=gnu99 \
-	-ffreestanding  \
-	-masm=intel     \
-	-mcmodel=kernel \
-	-mno-red-zone   \
-	-fno-pic        \
-	-fno-stack-protector    \
-	-fno-omit-frame-pointer \
+	-lgcc                \
+	-std=gnu99           \
+	-ffreestanding       \
+	-masm=intel          \
+	-mcmodel=kernel      \
+	-fno-pic             \
+	-fno-stack-protector \
 	$(LAI_INCLUDES)
 
 CCFLAGS := $(GFLAGS) \
-	-lgcc      \
-	-fno-rtti  \
-	-fno-exceptions \
-	-ffreestanding  \
-	-masm=intel     \
-	-mcmodel=kernel \
-	-mno-red-zone   \
-	-fno-pic        \
-	-fno-stack-protector    \
-	-fno-omit-frame-pointer \
+	-lgcc                \
+	-fno-rtti            \
+	-fno-exceptions      \
+	-ffreestanding       \
+	-masm=intel          \
+	-mcmodel=kernel      \
+	-fno-pic             \
+	-fno-stack-protector \
 	$(INCLUDES)
 
-LDFLAGS := $(GFLAGS) \
-	-ffreestanding \
+LDFLAGS := $(GFLAGS)        \
+	-ffreestanding          \
 	-z max-page-size=0x1000 \
 	-no-pie
 

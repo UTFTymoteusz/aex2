@@ -1,5 +1,7 @@
 #pragma once
 
+#include "aex/dev/net.hpp"
+#include "aex/mem/smartptr.hpp"
 #include "aex/net/ethernet.hpp"
 #include "aex/net/ipv4.hpp"
 
@@ -20,18 +22,18 @@ namespace AEX::NetProto {
             OP_REPLY    = 2,
         };
 
-        hardware_type_t hardware_type;
-        ethertype_t     protocol_type;
+        big_endian<uint16_t> hardware_type;
+        big_endian<uint16_t> protocol_type;
 
         uint8_t hardware_size;
         uint8_t protocol_size;
 
-        opcode_t opcode;
+        big_endian<uint16_t> opcode;
     } __attribute__((packed));
 
     class ARPLayer {
       public:
-        static void parse(void* packet_ptr, size_t len);
+        static void parse(Mem::SmartPointer<Dev::Net> net_dev, void* packet_ptr, size_t len);
 
         static void fillLayerIPv4(void* buffer, arp_header::opcode_t opcode,
                                   Net::mac_addr source_mac, Net::ipv4_addr source_ip,

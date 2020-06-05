@@ -12,8 +12,8 @@ using namespace AEX::Net;
 
 namespace AEX::NetProto {
     enum ethertype_t : uint16_t {
-        ARP  = 0x0806,
-        IPv4 = 0x0800,
+        ETH_ARP  = 0x0806,
+        ETH_IPv4 = 0x0800,
     };
 
     struct ethernet_header {
@@ -25,7 +25,7 @@ namespace AEX::NetProto {
 
     class EthernetLayer : public LinkLayer {
       public:
-        error_t parse(const void* packet_ptr, size_t len);
+        error_t parse(int device_id, const void* packet_ptr, size_t len);
 
         static optional<NetCore::packet_buffer*> encapsulate(mac_addr source, mac_addr dest,
                                                              ethertype_t type);
