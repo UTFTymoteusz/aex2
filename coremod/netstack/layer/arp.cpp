@@ -1,108 +1,130 @@
 #include "layer/arp.hpp"
 
-#include "aex/debug.hpp"
-#include "aex/dev/dev.hpp"
-#include "aex/dev/device.hpp"
-#include "aex/dev/net.hpp"
-#include "aex/endian.hpp"
-#include "aex/mem/smartptr.hpp"
-#include "aex/net/ipv4.hpp"
-#include "aex/printk.hpp"
+#include "aex/net/ethernet.hpp"
 
-#include "core/netcore.hpp"
+#include "layer/ethernet.hpp"
+#include "tx_core.hpp"
 
-#include <stdint.h>
+namespace AEX::NetStack {
+    IPC::QueryQueue<arp_query, 1000> ARPLayer::_query_queue;
 
+    bool arp_packet::is_valid_ipv4() {
+        // clang-format off
+        if ((uint16_t) header.hardware_type != arp_hardware_type_t::ARP_ETHERNET ||
+            (uint16_t) header.protocol_type != ethertype_t::ETH_IPv4 || 
+            header.hardware_size != 6 || header.protocol_size != 4)
+            return false;
+        // clang-format on
 
-using namespace AEX::Net;
-
-namespace AEX::NetProto {
-    void reply_received_ipv4_arp(mac_addr* source_mac, ipv4_addr* source, mac_addr* target_mac,
-                                 ipv4_addr* target) {
-        // expand pls
+        return true;
     }
 
-    void reply_to_ipv4_arp(mac_addr* source_mac, ipv4_addr* source, mac_addr*, ipv4_addr* target) {
-        for (auto iterator = Dev::devices.getIterator(); auto device = iterator.next();) {
-            if (device->type != Dev::Device::NET)
+    inline void parse_ipv4_request(Dev::NetDevice_SP net_dev, arp_packet* packet) {
+        if (packet->ipv4.target_ipv4 != net_dev->ipv4_addr)
+            return;
+
+        arp_packet reply_packet;
+
+        reply_packet.header.hardware_type = arp_hardware_type_t::ARP_ETHERNET;
+        reply_packet.header.hardware_size = 6;
+        reply_packet.header.protocol_type = ethertype_t::ETH_IPv4;
+        reply_packet.header.protocol_size = 4;
+        reply_packet.header.opcode        = arp_opcode_t::ARP_REPLY;
+
+        reply_packet.ipv4.sender_mac  = net_dev->ethernet_mac;
+        reply_packet.ipv4.sender_ipv4 = net_dev->ipv4_addr;
+        reply_packet.ipv4.target_mac  = packet->ipv4.sender_mac;
+        reply_packet.ipv4.target_ipv4 = packet->ipv4.sender_ipv4;
+
+        memcpy(reply_packet.footer, "aexAEXaexAEX", 12);
+
+        auto eth_buffer = EthernetLayer::encapsulate(net_dev->ethernet_mac, packet->ipv4.sender_mac,
+                                                     ethertype_t::ETH_ARP);
+
+        eth_buffer->write(&reply_packet, sizeof(arp_header) + sizeof(arp_ipv4) + 12);
+        queue_tx_packet(net_dev, eth_buffer->get(), eth_buffer->length());
+
+        eth_buffer->release();
+    }
+
+    inline void parse_ipv4_reply(Dev::NetDevice_SP net_dev, arp_packet* packet) {
+        if (packet->ipv4.target_ipv4 != net_dev->ipv4_addr)
+            return;
+
+        for (auto iterator = ARPLayer::_query_queue.getIterator(); auto query = iterator.next();) {
+            if (query->base->ipv4 != packet->ipv4.sender_ipv4)
                 continue;
 
-            auto net_dev = (Dev::Net*) device;
-
-            if (*target == net_dev->ipv4_addr) {
-                uint8_t buffer[28 + 12];
-
-                ARPLayer::fillLayerIPv4(buffer, arp_header::opcode_t::OP_REPLY,
-                                        net_dev->ethernet_mac, *target, *source_mac, *source);
-
-                memcpy(buffer + sizeof(arp_header) + 20, "aexAEXaexAEX", 12);
-
-                NetCore::queue_tx_packet(ethertype_t::ETH_ARP, buffer, sizeof(buffer));
-                break;
-            }
+            query->base->mac = packet->ipv4.sender_mac;
+            query->notify_of_success();
         }
     }
 
-    void ARPLayer::parse(Mem::SmartPointer<Dev::Net> net_dev, void* packet_ptr, size_t len) {
-        if (len < sizeof(arp_header))
-            return;
+    optional<Net::mac_addr> ARPLayer::query_ipv4(Dev::NetDevice_SP net_dev, Net::ipv4_addr addr) {
+        auto packet = arp_packet();
 
-        auto header = (arp_header*) packet_ptr;
+        packet.header.hardware_type = arp_hardware_type_t::ARP_ETHERNET;
+        packet.header.hardware_size = 6;
+        packet.header.protocol_type = ethertype_t::ETH_IPv4;
+        packet.header.protocol_size = 4;
+        packet.header.opcode        = arp_opcode_t::ARP_REQUEST;
 
-        if ((uint16_t) header->hardware_type != arp_header::hardware_type_t::ETHERNET ||
-            (uint16_t) header->protocol_type != ethertype_t::ETH_IPv4)
+        packet.ipv4.sender_mac  = net_dev->ethernet_mac;
+        packet.ipv4.sender_ipv4 = net_dev->ipv4_addr;
+        packet.ipv4.target_mac  = mac_addr(0, 0, 0, 0, 0, 0);
+        packet.ipv4.target_ipv4 = addr;
+
+        memcpy(packet.footer, "aexAEXaexAEX", 12);
+
+        auto eth_buffer = EthernetLayer::encapsulate(net_dev->ethernet_mac,
+                                                     mac_addr(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF),
+                                                     ethertype_t::ETH_ARP);
+        eth_buffer->write(&packet, sizeof(arp_header) + sizeof(arp_ipv4) + 12);
+
+        // This here is a lazy way to get a thread into being critical
+        Spinlock lockyboi;
+        lockyboi.acquire();
+
+        arp_query _arp_query = arp_query(addr);
+
+        auto promise = _query_queue.startQuery(&_arp_query);
+
+        queue_tx_packet(net_dev, eth_buffer->get(), eth_buffer->length());
+
+        eth_buffer->release();
+
+        lockyboi.release();
+
+        Proc::Thread::yield();
+
+        if (!promise->success)
+            return error_t::EHOSTUNREACH;
+
+        return _arp_query.mac;
+    }
+
+    void ARPLayer::parse(Dev::NetDevice_SP net_dev, uint8_t* buffer, uint16_t len) {
+        auto packet = (arp_packet*) buffer;
+
+        if ((uint16_t) packet->header.hardware_type != arp_hardware_type_t::ARP_ETHERNET ||
+            (uint16_t) packet->header.protocol_type != ethertype_t::ETH_IPv4)
             return;
 
         uint16_t true_len = sizeof(arp_header);
 
-        true_len += header->hardware_size * 2;
-        true_len += header->protocol_size * 2;
+        true_len += packet->header.hardware_size * 2;
+        true_len += packet->header.protocol_size * 2;
 
-        if (header->hardware_size != 6 || header->protocol_size != 4 || len < true_len)
+        if (len < true_len)
             return;
 
-        auto source_mac = (mac_addr*) ((uint8_t*) header + sizeof(header) + 0);
-        auto source_ip  = (ipv4_addr*) ((uint8_t*) header + sizeof(header) + 6);
-
-        auto target_mac = (mac_addr*) ((uint8_t*) header + sizeof(header) + 10);
-        auto target_ip  = (ipv4_addr*) ((uint8_t*) header + sizeof(header) + 16);
-
-        switch ((uint16_t) header->opcode) {
-        case arp_header::opcode_t::OP_REPLY:
-            if (*target_mac != net_dev->ethernet_mac)
-                return;
-
-            reply_received_ipv4_arp(source_mac, source_ip, target_mac, target_ip);
-            break;
-        case arp_header::opcode_t::OP_REQUEST:
-            if (*target_ip != net_dev->ipv4_addr)
-                return;
-
-            reply_to_ipv4_arp(source_mac, source_ip, target_mac, target_ip);
-            break;
-        default:
-            break;
+        if ((uint16_t) packet->header.opcode == arp_opcode_t::ARP_REQUEST) {
+            if (packet->is_valid_ipv4())
+                parse_ipv4_request(net_dev, packet);
         }
-    }
-
-    void ARPLayer::fillLayerIPv4(void* _buffer, arp_header::opcode_t opcode,
-                                 Net::mac_addr source_mac, Net::ipv4_addr source_ip,
-                                 Net::mac_addr target_mac, Net::ipv4_addr target_ip) {
-        uint8_t* buffer = (uint8_t*) _buffer;
-
-        auto header = (arp_header*) buffer;
-
-        header->hardware_type = (uint16_t) arp_header::hardware_type_t::ETHERNET;
-        header->protocol_type = (uint16_t) ethertype_t::ETH_IPv4;
-
-        header->hardware_size = 6;
-        header->protocol_size = 4;
-
-        header->opcode = (uint16_t) opcode;
-
-        memcpy(buffer + sizeof(arp_header) + 0, &source_mac, 6);
-        memcpy(buffer + sizeof(arp_header) + 6, &source_ip, 4);
-        memcpy(buffer + sizeof(arp_header) + 10, &target_mac, 6);
-        memcpy(buffer + sizeof(arp_header) + 16, &target_ip, 4);
+        else if ((uint16_t) packet->header.opcode == arp_opcode_t::ARP_REPLY) {
+            if (packet->is_valid_ipv4())
+                parse_ipv4_reply(net_dev, packet);
+        }
     }
 }

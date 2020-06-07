@@ -1,12 +1,13 @@
 #include "aex/arch/sys/cpu.hpp"
 #include "aex/debug.hpp"
 #include "aex/dev/name.hpp"
-#include "aex/dev/net.hpp"
+#include "aex/dev/netdevice.hpp"
 #include "aex/dev/pci.hpp"
 #include "aex/dev/tree/tree.hpp"
 #include "aex/math.hpp"
 #include "aex/mem/vmem.hpp"
 #include "aex/net/ipv4.hpp"
+#include "aex/net/net.hpp"
 #include "aex/printk.hpp"
 #include "aex/proc/thread.hpp"
 #include "aex/sys/irq.hpp"
@@ -34,6 +35,7 @@ auto constexpr CAPR     = 0x38;
 auto constexpr CBR      = 0x3A;
 auto constexpr IMR      = 0x3C;
 auto constexpr ISR      = 0x3E;
+auto constexpr TCR      = 0x40;
 auto constexpr RCR      = 0x44;
 auto constexpr CONFIG_1 = 0x52;
 
@@ -51,8 +53,10 @@ auto constexpr ISR_ROV = IMR_ROV;
 auto constexpr ISR_TOK = IMR_TOK;
 auto constexpr ISR_ROK = IMR_ROK;
 
-auto constexpr TSD_TOK = 0x01 << 15;
-auto constexpr TSD_OWN = 0x01 << 13;
+auto constexpr TSD_CRC        = 0x01 << 16;
+auto constexpr TSD_TOK        = 0x01 << 15;
+auto constexpr TSD_OWN        = 0x01 << 13;
+auto constexpr TSD_MXDMA_1024 = 0b110 << 8;
 
 auto constexpr RCR_SERR = 0x01 << 15;
 auto constexpr RCR_B64K = 0x03 << 11;
@@ -69,9 +73,10 @@ auto constexpr RCR_AAP  = 0x01 << 0;
 auto constexpr BUFFER_SIZE = 32768 + 0x10;
 auto constexpr BUFFER_MASK = (BUFFER_SIZE - 0x10) - 4;
 
-class RTL8139 : public Dev::Net {
-  public:
-    RTL8139(PCI::PCIDevice* device, const char* name) : Net(name, net_type_t::ETHERNET) {
+class RTL8139 : public Dev::NetDevice {
+    public:
+    RTL8139(PCI::PCIDevice* device, const char* name)
+        : NetDevice(name, Net::link_type_t::LINK_ETHERNET) {
         _tx_buffers = (uint8_t*) VMem::kernel_pagemap->allocContinuous(2048 * 4);
         _rx_buffer  = (uint8_t*) VMem::kernel_pagemap->allocContinuous(BUFFER_SIZE + 1500);
 
@@ -121,6 +126,7 @@ class RTL8139 : public Dev::Net {
         CPU::outportb(_io_base + CMD, CMD_TE | CMD_RE);
 
         // Let's set the params
+        CPU::outportd(_io_base + TCR, TSD_CRC | TSD_MXDMA_1024);
         CPU::outportd(_io_base + RCR, RCR_B32K | RCR_WRAP | RCR_AAP | RCR_AB | RCR_AM | RCR_AR);
 
         Sys::IRQ::register_threaded_handler(
@@ -156,7 +162,7 @@ class RTL8139 : public Dev::Net {
         return error_t::ENONE;
     }
 
-  private:
+    private:
     struct rx_frame {
         uint16_t flags;
         uint16_t len;
@@ -216,15 +222,13 @@ class RTL8139 : public Dev::Net {
 
             _rx_buffer_pos = (_rx_buffer_pos + (frame_len + 4 + 3)) & BUFFER_MASK;
 
-            // printk("rtl8139: rx: %i [%i vs %i]\n", frame_len, _rx_buffer_pos, pos);
-
             CPU::outportw(_io_base + CAPR, _rx_buffer_pos - 0x10);
         }
     }
 };
 
 class RTL8139Driver : public Tree::Driver {
-  public:
+    public:
     RTL8139Driver() : Driver("rtl8139") {}
     ~RTL8139Driver() {}
 
@@ -252,11 +256,11 @@ class RTL8139Driver : public Tree::Driver {
         if (!rtl->registerDevice())
             printk(PRINTK_WARN "rtl8139: %s: Failed to register\n", rtl->name);
 
-        rtl->setIPv4Address(AEX::Net::ipv4_addr(169, 254, 163, 201));
-        rtl->setIPv4Mask(AEX::Net::ipv4_addr(255, 255, 0, 0));
+        rtl->setIPv4Address(Net::ipv4_addr(192, 168, 0, 23));
+        rtl->setIPv4Mask(Net::ipv4_addr(255, 255, 255, 0));
     }
 
-  private:
+    private:
 };
 
 RTL8139Driver* driver = nullptr;

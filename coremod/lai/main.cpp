@@ -18,7 +18,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-
 using namespace AEX;
 
 const char* MODULE_NAME = "lai";

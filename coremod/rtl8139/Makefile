@@ -32,6 +32,7 @@ CCFLAGS := $(GFLAGS)     \
 	-mcmodel=kernel      \
 	-fno-pic             \
 	-fno-stack-protector \
+	-mno-red-zone        \
 	$(INCLUDES)
 
 ASFLAGS := -felf64

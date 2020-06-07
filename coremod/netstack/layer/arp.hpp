@@ -1,27 +1,28 @@
 #pragma once
 
-#include "aex/dev/net.hpp"
+#include "aex/dev/netdevice.hpp"
+#include "aex/endian.hpp"
+#include "aex/ipc/queryqueue.hpp"
 #include "aex/mem/smartptr.hpp"
+#include "aex/mem/vector.hpp"
 #include "aex/net/ethernet.hpp"
 #include "aex/net/ipv4.hpp"
-
-#include "layer/ethernet.hpp"
+#include "aex/optional.hpp"
 
 #include <stdint.h>
 
-namespace AEX::NetProto {
+namespace AEX::NetStack {
+    enum arp_hardware_type_t {
+        ARP_RESERVED = 0,
+        ARP_ETHERNET = 1,
+    };
+
+    enum arp_opcode_t {
+        ARP_REQUEST = 1,
+        ARP_REPLY   = 2,
+    };
+
     struct arp_header {
-        enum hardware_type_t : uint16_t {
-            RESERVED = 0,
-            ETHERNET = 1,
-        };
-
-        enum opcode_t : uint16_t {
-            OP_RESERVED = 0,
-            OP_REQUEST  = 1,
-            OP_REPLY    = 2,
-        };
-
         big_endian<uint16_t> hardware_type;
         big_endian<uint16_t> protocol_type;
 
@@ -31,14 +32,44 @@ namespace AEX::NetProto {
         big_endian<uint16_t> opcode;
     } __attribute__((packed));
 
-    class ARPLayer {
-      public:
-        static void parse(Mem::SmartPointer<Dev::Net> net_dev, void* packet_ptr, size_t len);
+    struct arp_ipv4 {
+        Net::mac_addr  sender_mac;
+        Net::ipv4_addr sender_ipv4;
+        Net::mac_addr  target_mac;
+        Net::ipv4_addr target_ipv4;
+    } __attribute__((packed));
 
-        static void fillLayerIPv4(void* buffer, arp_header::opcode_t opcode,
-                                  Net::mac_addr source_mac, Net::ipv4_addr source_ip,
-                                  Net::mac_addr target_mac, Net::ipv4_addr target_ip);
+    struct arp_packet {
+        arp_header header;
 
-      private:
+        union {
+            arp_ipv4 ipv4;
+        } __attribute__((packed));
+
+        char footer[12];
+
+        arp_packet(){};
+
+        inline bool is_valid_ipv4();
+    } __attribute__((packed));
+
+    struct arp_query {
+        Net::mac_addr  mac;
+        Net::ipv4_addr ipv4;
+
+        arp_query(Net::ipv4_addr _ipv4) {
+            ipv4 = _ipv4;
+        }
     };
-}
+
+    class ARPLayer {
+        public:
+        static optional<Net::mac_addr> query_ipv4(Dev::NetDevice_SP net_dev, Net::ipv4_addr addr);
+        static void parse(Dev::NetDevice_SP net_dev, uint8_t* buffer, uint16_t len);
+
+        private:
+        static IPC::QueryQueue<arp_query, 1000> _query_queue;
+
+        friend void parse_ipv4_reply(Dev::NetDevice_SP net_dev, arp_packet* packet);
+    };
+} // namespace AEX::NetStack

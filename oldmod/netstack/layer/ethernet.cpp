@@ -1,17 +1,15 @@
 #include "layer/ethernet.hpp"
 
-#include "aex/dev/netdevice.hpp"
 #include "aex/endian.hpp"
 #include "aex/printk.hpp"
 
-#include "rx_core.hpp"
-#include "tx_core.hpp"
+#include "core/netcore.hpp"
 
 #include <stdint.h>
 
 using namespace AEX::Net;
 
-namespace AEX::NetStack {
+namespace AEX::NetProto {
     error_t EthernetLayer::parse(int device_id, const void* packet_ptr, size_t len) {
         if (len < sizeof(ethernet_header))
             return error_t::EINVAL;
@@ -24,14 +22,14 @@ namespace AEX::NetStack {
 
         switch ((uint16_t) header->ethertype) {
         case ethertype_t::ETH_ARP:
-            NetStack::queue_rx_packet(device_id, ethertype_t::ETH_ARP,
-                                      (uint8_t*) packet_ptr + sizeof(ethernet_header),
-                                      len - sizeof(ethernet_header));
+            NetCore::queue_rx_packet(device_id, ethertype_t::ETH_ARP,
+                                     (uint8_t*) packet_ptr + sizeof(ethernet_header),
+                                     len - sizeof(ethernet_header));
             break;
         case ethertype_t::ETH_IPv4:
-            NetStack::queue_rx_packet(device_id, ethertype_t::ETH_IPv4,
-                                      (uint8_t*) packet_ptr + sizeof(ethernet_header),
-                                      len - sizeof(ethernet_header));
+            NetCore::queue_rx_packet(device_id, ethertype_t::ETH_IPv4,
+                                     (uint8_t*) packet_ptr + sizeof(ethernet_header),
+                                     len - sizeof(ethernet_header));
             break;
         default:
             break;
@@ -40,9 +38,9 @@ namespace AEX::NetStack {
         return error_t::ENONE;
     }
 
-    NetStack::packet_buffer* EthernetLayer::encapsulate(mac_addr source, mac_addr dest,
-                                                        ethertype_t type) {
-        auto buffer = NetStack::get_tx_buffer();
+    optional<NetCore::packet_buffer*> EthernetLayer::encapsulate(mac_addr source, mac_addr dest,
+                                                                 ethertype_t type) {
+        auto buffer = NetCore::get_tx_buffer();
 
         auto header = (ethernet_header*) buffer->alloc(sizeof(ethernet_header));
 

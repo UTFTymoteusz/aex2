@@ -5,13 +5,13 @@
 #include "aex/net/linklayer.hpp"
 #include "aex/optional.hpp"
 
-#include "packet_buffer.hpp"
+#include "core/packet_buffer.hpp"
 
 #include <stdint.h>
 
 using namespace AEX::Net;
 
-namespace AEX::NetStack {
+namespace AEX::NetProto {
     enum ethertype_t : uint16_t {
         ETH_ARP  = 0x0806,
         ETH_IPv4 = 0x0800,
@@ -28,8 +28,8 @@ namespace AEX::NetStack {
         public:
         error_t parse(int device_id, const void* packet_ptr, size_t len);
 
-        static NetStack::packet_buffer* encapsulate(mac_addr source, mac_addr dest,
-                                                    ethertype_t type);
+        static optional<NetCore::packet_buffer*> encapsulate(mac_addr source, mac_addr dest,
+                                                             ethertype_t type);
 
         private:
     };
