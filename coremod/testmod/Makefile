@@ -24,7 +24,6 @@ INCLUDES := -I. -I$(ARCH) -Iinclude/ -I../../kernel/include \
 		    -I../../kernel/arch/x64/include
 
 CCFLAGS := $(GFLAGS)     \
-	-lgcc                \
 	-fno-rtti            \
 	-fno-exceptions      \
 	-ffreestanding       \

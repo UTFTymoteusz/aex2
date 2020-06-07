@@ -77,8 +77,8 @@ extern "C" void* laihost_map(size_t addr, size_t count) {
     return VMem::kernel_pagemap->map(count, addr, PAGE_WRITE);
 }
 
-extern "C" void laihost_unmap(void*, size_t) {
-    printk("implement paging unmap pls\n");
+extern "C" void laihost_unmap(void* addr, size_t count) {
+    VMem::kernel_pagemap->free(addr, count);
 }
 
 

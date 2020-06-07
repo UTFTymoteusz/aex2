@@ -32,7 +32,6 @@ INCLUDES := -I. -I$(ARCH) -Iinclude/ -I../../kernel/include \
 		    -I../../kernel/arch/x64/include -I./lai/include
 
 LAI_CCFLAGS := $(GFLAGS) \
-	-lgcc                \
 	-std=gnu99           \
 	-ffreestanding       \
 	-masm=intel          \
@@ -42,7 +41,6 @@ LAI_CCFLAGS := $(GFLAGS) \
 	$(LAI_INCLUDES)
 
 CCFLAGS := $(GFLAGS) \
-	-lgcc                \
 	-fno-rtti            \
 	-fno-exceptions      \
 	-ffreestanding       \
