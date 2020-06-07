@@ -12,6 +12,7 @@
 #include "aex/proc/thread.hpp"
 #include "aex/sys/irq.hpp"
 
+#include <stddef.h>
 #include <stdint.h>
 
 using namespace AEX;

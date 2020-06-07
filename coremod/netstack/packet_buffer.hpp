@@ -2,6 +2,7 @@
 
 #include "aex/spinlock.hpp"
 
+#include <stddef.h>
 #include <stdint.h>
 
 namespace AEX::NetStack {

@@ -7,6 +7,7 @@
 #include "rx_core.hpp"
 #include "tx_core.hpp"
 
+#include <stddef.h>
 #include <stdint.h>
 
 using namespace AEX::Net;

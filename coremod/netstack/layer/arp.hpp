@@ -9,6 +9,7 @@
 #include "aex/net/ipv4.hpp"
 #include "aex/optional.hpp"
 
+#include <stddef.h>
 #include <stdint.h>
 
 namespace AEX::NetStack {

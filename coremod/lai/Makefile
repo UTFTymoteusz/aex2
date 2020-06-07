@@ -24,7 +24,7 @@ OBJS := $(OBJS) $(LAI_OBJS)
 
 MODULE_OBJ = $(BIN)$(MODULE_NAME).$(MODULE_ORDER).km
 
-GFLAGS = -O2 -Wall -Wextra -nostdlib -pipe
+GFLAGS = -O3 -Wall -Wextra -nostdlib -pipe
 
 LAI_INCLUDES := -I. -I./lai/include
 
@@ -40,7 +40,8 @@ LAI_CCFLAGS := $(GFLAGS) \
 	-fno-stack-protector \
 	$(LAI_INCLUDES)
 
-CCFLAGS := $(GFLAGS) \
+CCFLAGS := $(GFLAGS)     \
+	-std=c++17           \
 	-fno-rtti            \
 	-fno-exceptions      \
 	-ffreestanding       \

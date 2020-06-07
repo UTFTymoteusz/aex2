@@ -7,6 +7,7 @@
 
 #include "packet_buffer.hpp"
 
+#include <stddef.h>
 #include <stdint.h>
 
 using namespace AEX::Net;

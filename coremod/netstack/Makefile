@@ -18,12 +18,13 @@ OBJS := $(OBJS)
 
 MODULE_OBJ = $(BIN)$(MODULE_NAME).$(MODULE_ORDER).km
 
-GFLAGS = -O2 -Wall -Wextra -nostdlib -pipe
+GFLAGS = -O3 -Wall -Wextra -nostdlib -pipe
 
 INCLUDES := -I. -I$(ARCH) -Iinclude/ -I../../kernel/include \
 		    -I../../kernel/arch/x64/include
 
 CCFLAGS := $(GFLAGS)     \
+	-std=c++17           \
 	-fno-rtti            \
 	-fno-exceptions      \
 	-ffreestanding       \
