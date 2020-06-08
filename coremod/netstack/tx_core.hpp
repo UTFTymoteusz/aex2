@@ -20,6 +20,8 @@ namespace AEX::NetStack {
     void queue_tx_packet(const void* data, uint16_t len);
     void queue_tx_packet(Dev::NetDevice_SP net_dev, const void* data, uint16_t len);
 
-    Dev::NetDevice_SP get_interface(Net::mac_addr mac);
-    Dev::NetDevice_SP get_interface(Net::ipv4_addr ipv4_addr);
+    Dev::NetDevice_SP get_interface_by_srcaddr(Net::mac_addr mac);
+    Dev::NetDevice_SP get_interface_by_srcaddr(Net::ipv4_addr ipv4_addr);
+
+    Dev::NetDevice_SP get_interface_for_dst(Net::ipv4_addr ipv4_addr);
 }

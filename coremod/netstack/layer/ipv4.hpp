@@ -4,6 +4,8 @@
 #include "aex/endian.hpp"
 #include "aex/net/ipv4.hpp"
 
+#include "packet_buffer.hpp"
+
 #include <stdint.h>
 
 namespace AEX::NetStack {
@@ -17,8 +19,8 @@ namespace AEX::NetStack {
     };
 
     struct ipv4_header {
-        uint8_t version : 4;
         uint8_t header_length : 4;
+        uint8_t version : 4;
 
         uint8_t differentiated_services;
 
@@ -42,6 +44,10 @@ namespace AEX::NetStack {
         static constexpr Net::ipv4_addr BROADCAST = Net::ipv4_addr(255, 255, 255, 255);
 
         static void parse(Dev::NetDevice_SP net_dev, uint8_t* buffer, uint16_t len);
+
+        static optional<packet_buffer*> encapsulate(Net::ipv4_addr source, Net::ipv4_addr dest,
+                                                    ipv4_protocol_t type, Dev::NetDevice_SP net_dev,
+                                                    uint16_t len);
 
         private:
     };

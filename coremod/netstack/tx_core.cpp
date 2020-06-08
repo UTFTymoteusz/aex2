@@ -126,7 +126,7 @@ namespace AEX::NetStack {
         }
     }
 
-    Dev::NetDevice_SP get_interface(Net::mac_addr mac) {
+    Dev::NetDevice_SP get_interface_by_srcaddr(Net::mac_addr mac) {
         for (auto iterator = Dev::devices.getIterator(); auto device = iterator.next();) {
             if (device->type != Dev::Device::type_t::NET)
                 continue;
@@ -141,13 +141,12 @@ namespace AEX::NetStack {
         return Dev::devices.get(-1);
     }
 
-    Dev::NetDevice_SP get_interface(Net::ipv4_addr ipv4_addr) {
+    Dev::NetDevice_SP get_interface_by_srcaddr(Net::ipv4_addr ipv4_addr) {
         for (auto iterator = Dev::devices.getIterator(); auto device = iterator.next();) {
             if (device->type != Dev::Device::type_t::NET)
                 continue;
 
             auto net_dev = (Dev::NetDevice*) device;
-
             if (net_dev->ipv4_addr != ipv4_addr)
                 continue;
 
@@ -155,5 +154,24 @@ namespace AEX::NetStack {
         }
 
         return Dev::devices.get(-1);
+    }
+
+    Dev::NetDevice_SP get_interface_for_dst(Net::ipv4_addr ipv4_addr) {
+        int best_generic = -1;
+
+        for (auto iterator = Dev::devices.getIterator(); auto device = iterator.next();) {
+            if (device->type != Dev::Device::type_t::NET)
+                continue;
+
+            best_generic = iterator.index();
+
+            auto net_dev = (Dev::NetDevice*) device;
+            if ((net_dev->ipv4_addr & net_dev->ipv4_mask) != (ipv4_addr & net_dev->ipv4_mask))
+                continue;
+
+            return iterator.get_ptr();
+        }
+
+        return Dev::devices.get(best_generic);
     }
 }

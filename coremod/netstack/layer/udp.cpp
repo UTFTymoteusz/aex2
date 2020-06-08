@@ -6,8 +6,8 @@
 #include "protocol/udp.hpp"
 
 namespace AEX::NetStack {
-    void UDPLayer::parse(Dev::NetDevice_SP net_dev, Net::ipv4_addr source,
-                         Net::ipv4_addr destination, uint8_t* buffer, uint16_t len) {
+    void UDPLayer::parse(Dev::NetDevice_SP, Net::ipv4_addr source, Net::ipv4_addr destination,
+                         uint8_t* buffer, uint16_t len) {
         if (len < sizeof(udp_header))
             return;
 

@@ -29,8 +29,7 @@ namespace AEX::NetStack {
         public:
         error_t parse(int device_id, const void* packet_ptr, size_t len);
 
-        static NetStack::packet_buffer* encapsulate(mac_addr source, mac_addr dest,
-                                                    ethertype_t type);
+        static packet_buffer* encapsulate(mac_addr source, mac_addr dest, ethertype_t type);
 
         private:
     };

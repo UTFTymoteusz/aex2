@@ -21,14 +21,16 @@ void module_enter() {
     NetStack::tx_init();
     NetStack::rx_init();
 
-    Net::register_link_layer(Net::link_type_t::LINK_ETHERNET, new NetStack::EthernetLayer());
+    NetStack::UDPProtocol::init();
 
+    Net::register_link_layer(Net::link_type_t::LINK_ETHERNET, new NetStack::EthernetLayer());
     Net::register_inet_protocol(socket_protocol_t::IPROTO_UDP, new NetStack::UDPProtocol());
 
     /*while (true) {
         Proc::Thread::sleep(1000);
         auto mac_try = NetStack::ARPLayer::query_ipv4(
-            NetStack::get_interface(ipv4_addr(192, 168, 0, 23)), ipv4_addr(192, 168, 0, 220));
+            NetStack::get_interface_by_srcaddr(ipv4_addr(192, 168, 0, 23)), ipv4_addr(192, 168, 0,
+    220));
 
         if (!mac_try.has_value) {
             printk("arp: Failed\n");
