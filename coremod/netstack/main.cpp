@@ -1,7 +1,10 @@
 #include "aex/net/linklayer.hpp"
 #include "aex/net/net.hpp"
+#include "aex/net/socket.hpp"
+#include "aex/printk.hpp"
 
 #include "layer/ethernet.hpp"
+#include "protocol/udp.hpp"
 #include "rx_core.hpp"
 #include "tx_core.hpp"
 
@@ -19,6 +22,8 @@ void module_enter() {
     NetStack::rx_init();
 
     Net::register_link_layer(Net::link_type_t::LINK_ETHERNET, new NetStack::EthernetLayer());
+
+    Net::register_inet_protocol(socket_protocol_t::IPROTO_UDP, new NetStack::UDPProtocol());
 
     /*while (true) {
         Proc::Thread::sleep(1000);

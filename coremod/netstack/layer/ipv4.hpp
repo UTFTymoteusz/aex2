@@ -38,6 +38,7 @@ namespace AEX::NetStack {
 
     class IPv4Layer {
         public:
+        static constexpr Net::ipv4_addr ANY       = Net::ipv4_addr(0, 0, 0, 0);
         static constexpr Net::ipv4_addr BROADCAST = Net::ipv4_addr(255, 255, 255, 255);
 
         static void parse(Dev::NetDevice_SP net_dev, uint8_t* buffer, uint16_t len);
