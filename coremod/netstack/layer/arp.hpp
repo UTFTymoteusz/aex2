@@ -73,4 +73,4 @@ namespace AEX::NetStack {
 
         friend void parse_ipv4_reply(Dev::NetDevice_SP net_dev, arp_packet* packet);
     };
-} // namespace AEX::NetStack
+}

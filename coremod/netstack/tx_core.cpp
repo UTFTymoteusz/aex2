@@ -5,6 +5,7 @@
 #include "aex/ipc/event.hpp"
 #include "aex/mem/circularbuffer.hpp"
 #include "aex/mem/smartptr.hpp"
+#include "aex/printk.hpp"
 #include "aex/spinlock.hpp"
 
 #include "layer/arp.hpp"

@@ -5,10 +5,12 @@
 #include "aex/ipc/event.hpp"
 #include "aex/mem/circularbuffer.hpp"
 #include "aex/mem/smartptr.hpp"
+#include "aex/printk.hpp"
 #include "aex/spinlock.hpp"
 
 #include "layer/arp.hpp"
 #include "layer/ethernet.hpp"
+#include "layer/ipv4.hpp"
 #include "packet_buffer.hpp"
 
 #include <stddef.h>
@@ -42,9 +44,9 @@ namespace AEX::NetStack {
         case ethertype_t::ETH_ARP:
             ARPLayer::parse(net_dev, buffer, len);
             break;
-        /*case ethertype_t::ETH_IPv4:
+        case ethertype_t::ETH_IPv4:
             IPv4Layer::parse(net_dev, buffer, len);
-            break;*/
+            break;
         default:
             break;
         }

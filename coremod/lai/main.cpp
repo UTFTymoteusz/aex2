@@ -53,7 +53,7 @@ extern "C" int memcmp(const void* a, const void* b, size_t len) {
 
 
 extern "C" void laihost_log(int, const char* msg) {
-    printk("lai: %s\n", msg);
+    printk("lai: %c%s\n", toupper(msg[0]), msg + 1);
 }
 
 extern "C" void laihost_panic(const char* msg) {
