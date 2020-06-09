@@ -63,6 +63,20 @@ namespace AEX::NetStack {
         }
     };
 
+    struct arp_table_entry {
+        bool     updating = false;
+        uint64_t updated_at;
+
+        Net::mac_addr  mac;
+        Net::ipv4_addr ipv4;
+
+        arp_table_entry(uint64_t updated_at, Net::mac_addr mac, Net::ipv4_addr ipv4) {
+            this->updated_at = updated_at;
+            this->mac        = mac;
+            this->ipv4       = ipv4;
+        }
+    };
+
     class ARPLayer {
         public:
         static optional<Net::mac_addr> query_ipv4(Dev::NetDevice_SP net_dev, Net::ipv4_addr addr);
@@ -70,7 +84,12 @@ namespace AEX::NetStack {
 
         private:
         static IPC::QueryQueue<arp_query, 1000> _query_queue;
+        static Mem::Vector<arp_table_entry>     _arp_table;
+        static Spinlock                         _arp_table_lock;
 
         friend void parse_ipv4_reply(Dev::NetDevice_SP net_dev, arp_packet* packet);
     };
+
+    static constexpr auto ARP_REFRESH_NS = 40ul * 1000000000;
+    static constexpr auto ARP_TIMEOUT_NS = 60ul * 1000000000;
 }

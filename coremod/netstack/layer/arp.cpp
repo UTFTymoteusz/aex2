@@ -1,12 +1,16 @@
 #include "layer/arp.hpp"
 
 #include "aex/net/ethernet.hpp"
+#include "aex/printk.hpp"
+#include "aex/sys/time.hpp"
 
 #include "layer/ethernet.hpp"
 #include "tx_core.hpp"
 
 namespace AEX::NetStack {
     IPC::QueryQueue<arp_query, 1000> ARPLayer::_query_queue;
+    Mem::Vector<arp_table_entry>     ARPLayer::_arp_table;
+    Spinlock                         ARPLayer::_arp_table_lock;
 
     bool arp_packet::is_valid_ipv4() {
         // clang-format off
@@ -60,7 +64,33 @@ namespace AEX::NetStack {
         }
     }
 
+    // I need to make this async, somehow
     optional<Net::mac_addr> ARPLayer::query_ipv4(Dev::NetDevice_SP net_dev, Net::ipv4_addr addr) {
+        _arp_table_lock.acquire();
+
+        uint64_t uptime = Sys::get_uptime();
+
+        for (int i = 0; i < _arp_table.count(); i++) {
+            if (_arp_table[i].ipv4 != addr)
+                continue;
+
+            if (_arp_table[i].updated_at + ARP_TIMEOUT_NS <= uptime) {
+                _arp_table.erase(i);
+                break;
+            }
+
+            if (_arp_table[i].updated_at + ARP_REFRESH_NS <= uptime && !_arp_table[i].updating) {
+                _arp_table[i].updating = true;
+                break;
+            }
+
+            _arp_table_lock.release();
+
+            return _arp_table[i].mac;
+        }
+
+        _arp_table_lock.release();
+
         auto packet = arp_packet();
 
         packet.header.hardware_type = arp_hardware_type_t::ARP_ETHERNET;
@@ -86,19 +116,38 @@ namespace AEX::NetStack {
         lockyboi.acquire();
 
         arp_query _arp_query = arp_query(addr);
-
-        auto promise = _query_queue.startQuery(&_arp_query);
+        auto      _promise   = _query_queue.startQuery(&_arp_query);
 
         queue_tx_packet(net_dev, eth_buffer->get(), eth_buffer->length());
 
         eth_buffer->release();
-
         lockyboi.release();
 
         Proc::Thread::yield();
 
-        if (!promise->success)
+        if (!_promise->success)
             return error_t::EHOSTUNREACH;
+
+        _arp_table_lock.acquire();
+        uptime = Sys::get_uptime();
+
+        bool exists = false;
+
+        for (int i = 0; i < _arp_table.count(); i++) {
+            if (_arp_table[i].ipv4 != addr)
+                continue;
+
+            _arp_table[i].updated_at = uptime;
+            _arp_table[i].updating   = false;
+
+            exists = true;
+            break;
+        }
+
+        if (!exists)
+            _arp_table.pushBack(arp_table_entry(uptime, _arp_query.mac, addr));
+
+        _arp_table_lock.release();
 
         return _arp_query.mac;
     }
