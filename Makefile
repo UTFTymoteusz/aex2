@@ -14,6 +14,9 @@ iso:
 run:
 	cd kernel && $(MAKE) qemu
 
+runnet:
+	cd kernel && $(MAKE) qemunet
+
 clean:
 	cd coremod && $(MAKE) clean
 	cd kernel && $(MAKE) clean

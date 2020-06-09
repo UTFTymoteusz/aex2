@@ -261,9 +261,9 @@ class RTL8139Driver : public Tree::Driver {
         if (!rtl->registerDevice())
             printk(PRINTK_WARN "rtl8139: %s: Failed to register\n", rtl->name);
 
-        // rtl->setIPv4Address(Net::ipv4_addr(192, 168, 0, 23));
-        // rtl->setIPv4Mask(Net::ipv4_addr(255, 255, 255, 0));
-        // rtl->setIPv4Gateway(Net::ipv4_addr(192, 168, 0, 1));
+        rtl->setIPv4Address(Net::ipv4_addr(192, 168, 0, 23));
+        rtl->setIPv4Mask(Net::ipv4_addr(255, 255, 255, 0));
+        rtl->setIPv4Gateway(Net::ipv4_addr(192, 168, 0, 1));
         rtl->setMetric(10000);
     }
 

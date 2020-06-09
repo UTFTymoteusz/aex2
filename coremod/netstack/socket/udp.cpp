@@ -42,6 +42,20 @@ namespace AEX::NetStack {
         }
     }
 
+    error_t UDPSocket::connect(const sockaddr* addr) {
+        sockaddr_inet* _addr = (sockaddr_inet*) addr;
+        if (_addr->domain != socket_domain_t::AF_INET)
+            return error_t::EINVAL;
+
+        destination_address = _addr->addr;
+        destination_port    = _addr->port;
+
+        printk("udp: Connected a socket to port %i\n", _addr->port);
+
+        return error_t::ENONE;
+    }
+
+
     error_t UDPSocket::bind(const sockaddr* addr) {
         sockaddr_inet* _addr = (sockaddr_inet*) addr;
         if (_addr->domain != socket_domain_t::AF_INET)
@@ -56,38 +70,54 @@ namespace AEX::NetStack {
         this->source_address = _addr->addr;
         this->source_port    = _addr->port;
 
-        printk("udp: Bound a socket to %i\n", _addr->port);
+        printk("udp: Bound a socket to port %i\n", _addr->port);
 
         return error_t::ENONE;
     }
 
-    optional<size_t> UDPSocket::sendto(const void* buffer, size_t len, int flags,
+    optional<size_t> UDPSocket::sendTo(const void* buffer, size_t len, int flags,
                                        const sockaddr* dst_addr) {
-        if (!buffer || !dst_addr)
+        if (!buffer)
             return error_t::EINVAL;
 
-        auto _dst_addr = (sockaddr_inet*) dst_addr;
-        auto net_dev   = get_interface_for_dst(_dst_addr->addr);
+        Net::ipv4_addr addr;
+        uint16_t       port;
+
+        if (dst_addr) {
+            auto _dst_addr = (sockaddr_inet*) dst_addr;
+
+            addr = _dst_addr->addr;
+            port = _dst_addr->port;
+        }
+        else {
+            if (destination_port == 0)
+                return error_t::ENOTCONN;
+
+            addr = destination_address;
+            port = destination_port;
+        }
+
+        auto net_dev = get_interface_for_dst(addr);
         if (!net_dev.isValid())
             return error_t::ENETUNREACH;
 
         auto en_buffer =
-            IPv4Layer::encapsulate(net_dev->info.ipv4.addr, _dst_addr->addr,
-                                   ipv4_protocol_t::IPv4_UDP, net_dev, len + sizeof(udp_header));
+            IPv4Layer::encapsulate(net_dev->info.ipv4.addr, addr, ipv4_protocol_t::IPv4_UDP,
+                                   net_dev, len + sizeof(udp_header));
         if (!en_buffer.has_value)
             return en_buffer.error_code;
 
         auto _udp_header = (udp_header*) en_buffer.value->alloc(sizeof(udp_header));
 
         _udp_header->source_port      = this->source_port;
-        _udp_header->destination_port = _dst_addr->port;
+        _udp_header->destination_port = port;
         _udp_header->total_length     = len + sizeof(udp_header);
         _udp_header->checksum         = 0x0000;
 
         auto _fake_header = udp_fake_ipv4_header();
 
         _fake_header.source      = net_dev->info.ipv4.addr;
-        _fake_header.destination = _dst_addr->addr;
+        _fake_header.destination = destination_address;
         _fake_header.zero        = 0x00;
         _fake_header.protocol    = ipv4_protocol_t::IPv4_UDP;
         _fake_header.length      = len + sizeof(udp_header);
@@ -104,7 +134,8 @@ namespace AEX::NetStack {
         return len;
     }
 
-    optional<size_t> UDPSocket::recvfrom(void* buffer, size_t len, int flags, sockaddr* src_addr) {
+    optional<size_t> UDPSocket::receiveFrom(void* buffer, size_t len, int flags,
+                                            sockaddr* src_addr) {
         _lock.acquire();
 
         // Make nonblocking flag pls

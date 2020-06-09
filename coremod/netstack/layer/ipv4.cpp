@@ -87,7 +87,7 @@ namespace AEX::NetStack {
         header->differentiated_services = 0;
         header->total_length            = len + sizeof(ipv4_header);
         header->identification          = 0x2137;
-        header->flags                   = 0x0000;
+        header->flags                   = 0x4000;
         header->ttl                     = 69;
         header->protocol                = type;
         header->header_checksum         = 0x0000;

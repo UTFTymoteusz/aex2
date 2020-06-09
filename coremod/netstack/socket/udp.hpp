@@ -15,13 +15,17 @@ namespace AEX::NetStack {
         Net::ipv4_addr source_address;
         uint16_t       source_port = 0;
 
+        Net::ipv4_addr destination_address;
+        uint16_t       destination_port = 0;
+
         ~UDPSocket();
 
+        error_t connect(const Net::sockaddr* addr);
         error_t bind(const Net::sockaddr* addr);
 
-        optional<size_t> sendto(const void* buffer, size_t len, int flags,
+        optional<size_t> sendTo(const void* buffer, size_t len, int flags,
                                 const Net::sockaddr* dst_addr);
-        optional<size_t> recvfrom(void* buffer, size_t len, int flags, Net::sockaddr* src_addr);
+        optional<size_t> receiveFrom(void* buffer, size_t len, int flags, Net::sockaddr* src_addr);
 
         private:
         struct datagram {
