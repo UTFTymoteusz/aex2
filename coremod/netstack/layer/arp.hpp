@@ -64,22 +64,27 @@ namespace AEX::NetStack {
     };
 
     struct arp_table_entry {
-        bool     updating = false;
+        bool     mac_static = false;
+        bool     updating   = false;
         uint64_t updated_at;
 
         Net::mac_addr  mac;
         Net::ipv4_addr ipv4;
 
-        arp_table_entry(uint64_t updated_at, Net::mac_addr mac, Net::ipv4_addr ipv4) {
+        arp_table_entry(uint64_t updated_at, Net::mac_addr mac, Net::ipv4_addr ipv4,
+                        bool mac_static = false) {
             this->updated_at = updated_at;
             this->mac        = mac;
             this->ipv4       = ipv4;
+            this->mac_static = mac_static;
         }
     };
 
     class ARPLayer {
         public:
         static optional<Net::mac_addr> query_ipv4(Dev::NetDevice_SP net_dev, Net::ipv4_addr addr);
+        static void                    add_static_entry(Net::ipv4_addr addr, Net::mac_addr mac);
+
         static void parse(Dev::NetDevice_SP net_dev, uint8_t* buffer, uint16_t len);
 
         private:

@@ -12,8 +12,6 @@ namespace AEX::NetStack {
 
     class UDPSocket : public Net::Socket {
         public:
-        // bool active = false;
-
         Net::ipv4_addr source_address;
         uint16_t       source_port = 0;
 
@@ -43,6 +41,8 @@ namespace AEX::NetStack {
 
         Spinlock         _lock;
         IPC::SimpleEvent _event;
+
+        bool _non_blocking = false;
 
         void packetReceived(Net::ipv4_addr src, uint16_t src_port, uint8_t* buffer, uint16_t len);
 

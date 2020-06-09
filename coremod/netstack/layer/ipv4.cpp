@@ -5,6 +5,7 @@
 
 #include "checksum.hpp"
 #include "layer/arp.hpp"
+#include "layer/none.hpp"
 #include "layer/udp.hpp"
 #include "tx_core.hpp"
 
@@ -15,7 +16,8 @@ namespace AEX::NetStack {
 
         auto header = (ipv4_header*) buffer;
         auto dst    = header->destination;
-        if (dst != net_dev->ipv4_addr && dst != BROADCAST && dst != net_dev->ipv4_broadcast)
+        if (dst != net_dev->info.ipv4.addr && dst != BROADCAST &&
+            dst != net_dev->info.ipv4.broadcast)
             return;
 
         uint32_t total = sum_bytes(header, sizeof(ipv4_header));
@@ -52,12 +54,13 @@ namespace AEX::NetStack {
         case link_type_t::LINK_ETHERNET: {
             mac_addr mac;
 
-            bool local = (net_dev->ipv4_addr & net_dev->ipv4_mask) == (dest & net_dev->ipv4_mask);
+            bool local = (net_dev->info.ipv4.addr & net_dev->info.ipv4.mask) ==
+                         (dest & net_dev->info.ipv4.mask);
 
-            auto dest_arp  = local ? dest : net_dev->ipv4_gateway;
+            auto dest_arp  = local ? dest : net_dev->info.ipv4.gateway;
             bool mac_found = false;
 
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 6; i++) {
                 auto mac_try = ARPLayer::query_ipv4(net_dev, dest_arp);
                 if (!mac_try.has_value)
                     continue;
@@ -70,11 +73,13 @@ namespace AEX::NetStack {
             if (!mac_found)
                 return local ? error_t::EHOSTDOWN : error_t::EHOSTUNREACH;
 
-            buffer = EthernetLayer::encapsulate(net_dev->ethernet_mac, mac, ethertype_t::ETH_IPv4);
+            buffer = EthernetLayer::encapsulate(net_dev->info.ipv4.mac, mac, ethertype_t::ETH_IPv4);
         } break;
         default:
+            buffer = NoneLayer::encapsulate(ethertype_t::ETH_IPv4);
             break;
         }
+
         auto header = (ipv4_header*) buffer->alloc(sizeof(ipv4_header));
 
         header->version                 = 4;

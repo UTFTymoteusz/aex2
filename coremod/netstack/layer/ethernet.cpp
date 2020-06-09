@@ -20,19 +20,19 @@ namespace AEX::NetStack {
         auto header  = (ethernet_header*) packet_ptr;
         auto net_dev = Dev::get_net_device(device_id);
 
-        if (header->destination != net_dev->ethernet_mac && !header->destination.isBroadcast())
+        if (header->destination != net_dev->info.ipv4.mac && !header->destination.isBroadcast())
             return error_t::EINVAL;
 
         switch ((uint16_t) header->ethertype) {
         case ethertype_t::ETH_ARP:
-            NetStack::queue_rx_packet(device_id, ethertype_t::ETH_ARP,
-                                      (uint8_t*) packet_ptr + sizeof(ethernet_header),
-                                      len - sizeof(ethernet_header));
+            queue_rx_packet(device_id, ethertype_t::ETH_ARP,
+                            (uint8_t*) packet_ptr + sizeof(ethernet_header),
+                            len - sizeof(ethernet_header));
             break;
         case ethertype_t::ETH_IPv4:
-            NetStack::queue_rx_packet(device_id, ethertype_t::ETH_IPv4,
-                                      (uint8_t*) packet_ptr + sizeof(ethernet_header),
-                                      len - sizeof(ethernet_header));
+            queue_rx_packet(device_id, ethertype_t::ETH_IPv4,
+                            (uint8_t*) packet_ptr + sizeof(ethernet_header),
+                            len - sizeof(ethernet_header));
             break;
         default:
             break;
@@ -41,9 +41,8 @@ namespace AEX::NetStack {
         return error_t::ENONE;
     }
 
-    NetStack::packet_buffer* EthernetLayer::encapsulate(mac_addr source, mac_addr dest,
-                                                        ethertype_t type) {
-        auto buffer = NetStack::get_tx_buffer();
+    packet_buffer* EthernetLayer::encapsulate(mac_addr source, mac_addr dest, ethertype_t type) {
+        auto buffer = get_tx_buffer();
 
         auto header = (ethernet_header*) buffer->alloc(sizeof(ethernet_header));
 

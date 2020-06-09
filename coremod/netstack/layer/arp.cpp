@@ -24,7 +24,7 @@ namespace AEX::NetStack {
     }
 
     inline void parse_ipv4_request(Dev::NetDevice_SP net_dev, arp_packet* packet) {
-        if (packet->ipv4.target_ipv4 != net_dev->ipv4_addr)
+        if (packet->ipv4.target_ipv4 != net_dev->info.ipv4.addr)
             return;
 
         arp_packet reply_packet;
@@ -35,15 +35,15 @@ namespace AEX::NetStack {
         reply_packet.header.protocol_size = 4;
         reply_packet.header.opcode        = arp_opcode_t::ARP_REPLY;
 
-        reply_packet.ipv4.sender_mac  = net_dev->ethernet_mac;
-        reply_packet.ipv4.sender_ipv4 = net_dev->ipv4_addr;
+        reply_packet.ipv4.sender_mac  = net_dev->info.ipv4.mac;
+        reply_packet.ipv4.sender_ipv4 = net_dev->info.ipv4.addr;
         reply_packet.ipv4.target_mac  = packet->ipv4.sender_mac;
         reply_packet.ipv4.target_ipv4 = packet->ipv4.sender_ipv4;
 
         memcpy(reply_packet.footer, "aexAEXaexAEX", 12);
 
-        auto eth_buffer = EthernetLayer::encapsulate(net_dev->ethernet_mac, packet->ipv4.sender_mac,
-                                                     ethertype_t::ETH_ARP);
+        auto eth_buffer = EthernetLayer::encapsulate(net_dev->info.ipv4.mac,
+                                                     packet->ipv4.sender_mac, ethertype_t::ETH_ARP);
 
         eth_buffer->write(&reply_packet, sizeof(arp_header) + sizeof(arp_ipv4) + 12);
         queue_tx_packet(net_dev, eth_buffer->get(), eth_buffer->length());
@@ -52,7 +52,7 @@ namespace AEX::NetStack {
     }
 
     inline void parse_ipv4_reply(Dev::NetDevice_SP net_dev, arp_packet* packet) {
-        if (packet->ipv4.target_ipv4 != net_dev->ipv4_addr)
+        if (packet->ipv4.target_ipv4 != net_dev->info.ipv4.addr)
             return;
 
         for (auto iterator = ARPLayer::_query_queue.getIterator(); auto query = iterator.next();) {
@@ -99,14 +99,14 @@ namespace AEX::NetStack {
         packet.header.protocol_size = 4;
         packet.header.opcode        = arp_opcode_t::ARP_REQUEST;
 
-        packet.ipv4.sender_mac  = net_dev->ethernet_mac;
-        packet.ipv4.sender_ipv4 = net_dev->ipv4_addr;
+        packet.ipv4.sender_mac  = net_dev->info.ipv4.mac;
+        packet.ipv4.sender_ipv4 = net_dev->info.ipv4.addr;
         packet.ipv4.target_mac  = mac_addr(0, 0, 0, 0, 0, 0);
         packet.ipv4.target_ipv4 = addr;
 
         memcpy(packet.footer, "aexAEXaexAEX", 12);
 
-        auto eth_buffer = EthernetLayer::encapsulate(net_dev->ethernet_mac,
+        auto eth_buffer = EthernetLayer::encapsulate(net_dev->info.ipv4.mac,
                                                      mac_addr(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF),
                                                      ethertype_t::ETH_ARP);
         eth_buffer->write(&packet, sizeof(arp_header) + sizeof(arp_ipv4) + 12);
@@ -150,6 +150,22 @@ namespace AEX::NetStack {
         _arp_table_lock.release();
 
         return _arp_query.mac;
+    }
+
+    void ARPLayer::add_static_entry(Net::ipv4_addr addr, Net::mac_addr mac) {
+        _arp_table_lock.acquire();
+
+        for (int i = 0; i < _arp_table.count(); i++) {
+            if (_arp_table[i].ipv4 != addr)
+                continue;
+
+            _arp_table[i].mac_static = true;
+            _arp_table[i].mac        = mac;
+        }
+
+        _arp_table.pushBack(arp_table_entry(0, mac, addr, true));
+
+        _arp_table_lock.release();
     }
 
     void ARPLayer::parse(Dev::NetDevice_SP net_dev, uint8_t* buffer, uint16_t len) {

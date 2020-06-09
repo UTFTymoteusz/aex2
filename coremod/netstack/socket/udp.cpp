@@ -72,8 +72,8 @@ namespace AEX::NetStack {
             return error_t::ENETUNREACH;
 
         auto en_buffer =
-            IPv4Layer::encapsulate(net_dev->ipv4_addr, _dst_addr->addr, ipv4_protocol_t::IPv4_UDP,
-                                   net_dev, len + sizeof(udp_header));
+            IPv4Layer::encapsulate(net_dev->info.ipv4.addr, _dst_addr->addr,
+                                   ipv4_protocol_t::IPv4_UDP, net_dev, len + sizeof(udp_header));
         if (!en_buffer.has_value)
             return en_buffer.error_code;
 
@@ -86,7 +86,7 @@ namespace AEX::NetStack {
 
         auto _fake_header = udp_fake_ipv4_header();
 
-        _fake_header.source      = net_dev->ipv4_addr;
+        _fake_header.source      = net_dev->info.ipv4.addr;
         _fake_header.destination = _dst_addr->addr;
         _fake_header.zero        = 0x00;
         _fake_header.protocol    = ipv4_protocol_t::IPv4_UDP;

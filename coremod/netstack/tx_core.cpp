@@ -132,7 +132,7 @@ namespace AEX::NetStack {
                 continue;
 
             auto net_dev = (Dev::NetDevice*) device;
-            if (net_dev->ethernet_mac != mac)
+            if (net_dev->info.ipv4.mac != mac)
                 continue;
 
             return iterator.get_ptr();
@@ -147,7 +147,7 @@ namespace AEX::NetStack {
                 continue;
 
             auto net_dev = (Dev::NetDevice*) device;
-            if (net_dev->ipv4_addr != ipv4_addr)
+            if (net_dev->info.ipv4.addr != ipv4_addr)
                 continue;
 
             return iterator.get_ptr();
@@ -158,15 +158,20 @@ namespace AEX::NetStack {
 
     Dev::NetDevice_SP get_interface_for_dst(Net::ipv4_addr ipv4_addr) {
         int best_generic = -1;
+        int best_metric  = 23232323;
 
         for (auto iterator = Dev::devices.getIterator(); auto device = iterator.next();) {
             if (device->type != Dev::Device::type_t::NET)
                 continue;
 
-            best_generic = iterator.index();
-
             auto net_dev = (Dev::NetDevice*) device;
-            if ((net_dev->ipv4_addr & net_dev->ipv4_mask) != (ipv4_addr & net_dev->ipv4_mask))
+            if (net_dev->metric < best_metric) {
+                best_metric  = net_dev->metric;
+                best_generic = iterator.index();
+            }
+
+            if ((net_dev->info.ipv4.addr & net_dev->info.ipv4.mask) !=
+                (ipv4_addr & net_dev->info.ipv4.mask))
                 continue;
 
             return iterator.get_ptr();
