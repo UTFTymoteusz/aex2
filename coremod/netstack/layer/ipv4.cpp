@@ -6,6 +6,7 @@
 #include "checksum.hpp"
 #include "layer/arp.hpp"
 #include "layer/none.hpp"
+#include "layer/tcp.hpp"
 #include "layer/udp.hpp"
 #include "tx_core.hpp"
 
@@ -27,6 +28,8 @@ namespace AEX::NetStack {
         }
 
         buffer += sizeof(ipv4_header);
+
+        len = min<uint16_t>((uint16_t) header->total_length, len);
         len -= sizeof(ipv4_header);
 
         switch (header->protocol) {
@@ -34,7 +37,7 @@ namespace AEX::NetStack {
             printk("ipv4: icmp\n");
             break;
         case ipv4_protocol_t::IPv4_TCP:
-            printk("ipv4: tcp\n");
+            TCPLayer::parse(net_dev, header->source, header->destination, buffer, len);
             break;
         case ipv4_protocol_t::IPv4_UDP:
             UDPLayer::parse(net_dev, header->source, header->destination, buffer, len);

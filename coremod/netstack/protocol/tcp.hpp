@@ -11,16 +11,17 @@
 #include <stdint.h>
 
 namespace AEX::NetStack {
-    static constexpr auto UDP_SOCKET_BUFFER_SIZE = 1048576;
+    static constexpr auto TCP_SOCKET_BUFFER_SIZE = 65536;
 
-    class UDPSocket;
+    class TCPSocket;
 
-    class UDPProtocol : public Net::INetProtocol {
+    class TCPProtocol : public Net::INetProtocol {
         public:
         static Spinlock                        sockets_lock;
-        static Mem::Vector<UDPSocket*, 32, 32> sockets;
+        static Mem::Vector<TCPSocket*, 32, 32> sockets;
 
         static void init();
+        static void loop();
 
         optional<Net::Socket*> createSocket(Net::socket_type_t type);
 
@@ -35,5 +36,7 @@ namespace AEX::NetStack {
         static Spinlock  _ports_lock;
         static uint32_t* _port_bitmap;
         static uint16_t  _port_dynamic_last;
+
+        static Mem::SmartPointer<Proc::Thread> _loop_thread;
     };
 }

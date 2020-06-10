@@ -6,6 +6,7 @@
 #include "layer/ethernet.hpp"
 #include "layer/none.hpp"
 #include "loopbackdev.hpp"
+#include "protocol/tcp.hpp"
 #include "protocol/udp.hpp"
 #include "rx_core.hpp"
 #include "tx_core.hpp"
@@ -26,6 +27,7 @@ void module_enter() {
     NetStack::ARPLayer::add_static_entry(Net::ipv4_addr(255, 255, 255, 255),
                                          Net::mac_addr(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF));
 
+    NetStack::TCPProtocol::init();
     NetStack::UDPProtocol::init();
 
     auto loopback_dev = new NetStack::Loopback();
@@ -38,6 +40,8 @@ void module_enter() {
 
     Net::register_link_layer(Net::link_type_t::LINK_NONE, new NetStack::NoneLayer());
     Net::register_link_layer(Net::link_type_t::LINK_ETHERNET, new NetStack::EthernetLayer());
+
+    Net::register_inet_protocol(socket_protocol_t::IPROTO_TCP, new NetStack::TCPProtocol());
     Net::register_inet_protocol(socket_protocol_t::IPROTO_UDP, new NetStack::UDPProtocol());
 
     /*while (true) {

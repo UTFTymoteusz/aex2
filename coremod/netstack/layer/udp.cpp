@@ -25,7 +25,7 @@ namespace AEX::NetStack {
             uint32_t total = sum_bytes(&fake_header, sizeof(fake_header)) +
                              sum_bytes(buffer, header->total_length);
             if (to_checksum(total) != 0x0000) {
-                printk(PRINTK_WARN "udp: Got a packet with an invalid checksuUDPProtocol\n");
+                printk(PRINTK_WARN "udp: Got a packet with an invalid checksum\n");
                 return;
             }
         }

@@ -171,7 +171,7 @@ namespace AEX::NetStack {
 
     void UDPSocket::packetReceived(Net::ipv4_addr src, uint16_t src_port, uint8_t* buffer,
                                    uint16_t len) {
-        if (_buffered_size + len > SOCKET_BUFFER_SIZE) {
+        if (_buffered_size + len > UDP_SOCKET_BUFFER_SIZE) {
             printk("udp: Socket at port %i buffer overflow\n", source_port);
             return;
         }

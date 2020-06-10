@@ -50,9 +50,6 @@ namespace AEX::NetStack {
 
         void packetReceived(Net::ipv4_addr src, uint16_t src_port, uint8_t* buffer, uint16_t len);
 
-        uint16_t allocatePort();
-        void     releasePort(uint16_t port);
-
         friend class UDPProtocol;
     };
 }
