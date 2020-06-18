@@ -7,7 +7,7 @@ namespace AEX::NetStack {
     error_t NoneLayer::parse(int device_id, const void* packet_ptr, size_t len) {
         ethertype_t ethertype = *((ethertype_t*) packet_ptr);
 
-        packet_ptr += sizeof(ethertype_t);
+        packet_ptr = (void*) ((uint8_t*) packet_ptr + sizeof(ethertype_t));
         len -= sizeof(ethertype_t);
 
         queue_rx_packet(device_id, ethertype, packet_ptr, len);
