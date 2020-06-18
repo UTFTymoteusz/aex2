@@ -2,13 +2,16 @@
     "files.associations": {
         "*.real": "asm",
         "*.hpp": "cpp",
+        "*.asmr": "asm",
         "types.hpp": "c",
         "stdint.h": "c",
         "printk.hpp": "c",
         "new": "cpp",
         "type_traits": "cpp",
         "typeinfo": "cpp",
-        "exception": "cpp"
+        "exception": "cpp",
+        "cstdarg": "cpp",
+        "cstdint": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

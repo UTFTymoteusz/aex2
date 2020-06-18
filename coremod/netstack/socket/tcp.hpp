@@ -61,6 +61,8 @@ namespace AEX::NetStack {
 
             int     len;
             uint8_t buffer[];
+
+            segment() {}
         };
 
         Mem::CircularBuffer _tx_circ_buffer = Mem::CircularBuffer(8192);

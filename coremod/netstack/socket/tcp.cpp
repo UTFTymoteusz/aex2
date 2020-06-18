@@ -163,9 +163,7 @@ namespace AEX::NetStack {
 
             Proc::Thread::yield();
 
-            if ()
-
-                _lock.acquire();
+            _lock.acquire();
             read_len = min<size_t>(_rx_circ_buffer.readAvailable(), len);
         }
 
