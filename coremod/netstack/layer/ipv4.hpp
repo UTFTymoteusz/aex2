@@ -1,8 +1,8 @@
 #pragma once
 
-#include "aex/dev/netdevice.hpp"
-#include "aex/endian.hpp"
-#include "aex/net/ipv4.hpp"
+#include "aex/byte.hpp"
+#include "aex/dev.hpp"
+#include "aex/net.hpp"
 
 #include "packet_buffer.hpp"
 

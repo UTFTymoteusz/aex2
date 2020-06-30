@@ -1,6 +1,6 @@
 #include "protocol/tcp.hpp"
 
-#include "aex/net/socket.hpp"
+#include "aex/net.hpp"
 #include "aex/printk.hpp"
 
 #include "checksum.hpp"

@@ -1,6 +1,6 @@
 #include "aex/arch/sys/cpu.hpp"
 #include "aex/debug.hpp"
-#include "aex/dev/tree/tree.hpp"
+#include "aex/dev/tree.hpp"
 #include "aex/printk.hpp"
 
 #include "common.hpp"

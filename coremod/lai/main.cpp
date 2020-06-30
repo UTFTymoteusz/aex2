@@ -1,13 +1,12 @@
-#include "aex/acpi.hpp"
 #include "aex/arch/sys/cpu.hpp"
 #include "aex/dev/pci.hpp"
 #include "aex/kpanic.hpp"
-#include "aex/mem/heap.hpp"
-#include "aex/mem/vmem.hpp"
+#include "aex/mem.hpp"
 #include "aex/module.hpp"
 #include "aex/printk.hpp"
-#include "aex/proc/thread.hpp"
+#include "aex/proc.hpp"
 #include "aex/string.hpp"
+#include "aex/sys/acpi.hpp"
 
 #include "lai/core.h"
 #include "lai/helpers/pci.h"
@@ -19,6 +18,7 @@
 #include <stdint.h>
 
 using namespace AEX;
+using namespace AEX::Mem;
 
 const char* MODULE_NAME = "lai";
 
@@ -74,11 +74,11 @@ extern "C" void laihost_free(void* ptr) {
 }
 
 extern "C" void* laihost_map(size_t addr, size_t count) {
-    return VMem::kernel_pagemap->map(count, addr, PAGE_WRITE);
+    return Mem::kernel_pagemap->map(count, addr, PAGE_WRITE);
 }
 
 extern "C" void laihost_unmap(void* addr, size_t count) {
-    VMem::kernel_pagemap->free(addr, count);
+    Mem::kernel_pagemap->free(addr, count);
 }
 
 

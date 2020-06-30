@@ -1,9 +1,9 @@
 #pragma once
 
-#include "aex/dev/netdevice.hpp"
-#include "aex/mem/smartptr.hpp"
+#include "aex/dev.hpp"
+#include "aex/mem.hpp"
+#include "aex/net.hpp"
 #include "aex/net/ethernet.hpp"
-#include "aex/net/ipv4.hpp"
 
 #include "layer/ethernet.hpp"
 

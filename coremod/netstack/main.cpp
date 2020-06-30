@@ -1,6 +1,5 @@
+#include "aex/net.hpp"
 #include "aex/net/linklayer.hpp"
-#include "aex/net/net.hpp"
-#include "aex/net/socket.hpp"
 #include "aex/printk.hpp"
 
 #include "layer/ethernet.hpp"
@@ -13,7 +12,7 @@
 
 // clang-format off
 #include "layer/arp.hpp"
-#include "aex/proc/thread.hpp"
+#include "aex/proc.hpp"
 // clang-format on
 
 using namespace AEX;

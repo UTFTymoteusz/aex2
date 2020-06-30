@@ -2,10 +2,9 @@
 
 #include "aex/errno.hpp"
 #include "aex/ipc/event.hpp"
-#include "aex/mem/vector.hpp"
+#include "aex/mem.hpp"
+#include "aex/net.hpp"
 #include "aex/net/inetprotocol.hpp"
-#include "aex/net/ipv4.hpp"
-#include "aex/net/socket.hpp"
 #include "aex/spinlock.hpp"
 
 #include <stdint.h>

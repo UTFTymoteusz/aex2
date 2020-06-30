@@ -1,7 +1,7 @@
 #include "socket/udp.hpp"
 
 #include "aex/ipc/event.hpp"
-#include "aex/net/socket.hpp"
+#include "aex/net.hpp"
 #include "aex/printk.hpp"
 #include "aex/spinlock.hpp"
 
@@ -14,6 +14,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+using namespace AEX::Mem;
 using namespace AEX::Net;
 
 namespace AEX::NetStack {

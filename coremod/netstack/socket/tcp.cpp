@@ -1,8 +1,8 @@
 #include "socket/tcp.hpp"
 
 #include "aex/ipc/event.hpp"
-#include "aex/mem/cpp.hpp"
-#include "aex/net/socket.hpp"
+#include "aex/mem.hpp"
+#include "aex/net.hpp"
 #include "aex/printk.hpp"
 #include "aex/spinlock.hpp"
 #include "aex/sys/time.hpp"
@@ -16,6 +16,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+using namespace AEX::Mem;
 using namespace AEX::Net;
 
 namespace AEX::NetStack {

@@ -1,8 +1,7 @@
 #include "aex/fs/file.hpp"
-#include "aex/mem/heap.hpp"
+#include "aex/mem.hpp"
 #include "aex/printk.hpp"
-#include "aex/proc/proc.hpp"
-#include "aex/proc/thread.hpp"
+#include "aex/proc.hpp"
 #include "aex/tty.hpp"
 
 using namespace AEX;

@@ -1,12 +1,11 @@
 #pragma once
 
-#include "aex/dev/netdevice.hpp"
-#include "aex/endian.hpp"
+#include "aex/byte.hpp"
+#include "aex/dev.hpp"
 #include "aex/ipc/queryqueue.hpp"
-#include "aex/mem/smartptr.hpp"
-#include "aex/mem/vector.hpp"
+#include "aex/mem.hpp"
+#include "aex/net.hpp"
 #include "aex/net/ethernet.hpp"
-#include "aex/net/ipv4.hpp"
 #include "aex/optional.hpp"
 
 #include <stddef.h>

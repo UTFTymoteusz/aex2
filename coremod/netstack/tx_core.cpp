@@ -1,10 +1,8 @@
 #include "tx_core.hpp"
 
-#include "aex/dev/dev.hpp"
-#include "aex/dev/netdevice.hpp"
+#include "aex/dev.hpp"
 #include "aex/ipc/event.hpp"
-#include "aex/mem/circularbuffer.hpp"
-#include "aex/mem/smartptr.hpp"
+#include "aex/mem.hpp"
 #include "aex/printk.hpp"
 #include "aex/spinlock.hpp"
 

@@ -1,6 +1,6 @@
 #include "layer/ipv4.hpp"
 
-#include "aex/dev/netdevice.hpp"
+#include "aex/dev.hpp"
 #include "aex/printk.hpp"
 
 #include "checksum.hpp"

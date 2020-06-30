@@ -1,6 +1,6 @@
 #pragma once
 
-#include "aex/endian.hpp"
+#include "aex/byte.hpp"
 #include "aex/net/ethernet.hpp"
 #include "aex/net/linklayer.hpp"
 #include "aex/optional.hpp"

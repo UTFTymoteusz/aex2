@@ -1,15 +1,13 @@
 #include "aex/arch/sys/cpu.hpp"
 #include "aex/debug.hpp"
-#include "aex/dev/name.hpp"
-#include "aex/dev/netdevice.hpp"
+#include "aex/dev.hpp"
 #include "aex/dev/pci.hpp"
-#include "aex/dev/tree/tree.hpp"
+#include "aex/dev/tree.hpp"
 #include "aex/math.hpp"
-#include "aex/mem/vmem.hpp"
-#include "aex/net/ipv4.hpp"
-#include "aex/net/net.hpp"
+#include "aex/mem.hpp"
+#include "aex/net.hpp"
 #include "aex/printk.hpp"
-#include "aex/proc/thread.hpp"
+#include "aex/proc.hpp"
 #include "aex/sys/irq.hpp"
 
 #include <stddef.h>
@@ -78,8 +76,8 @@ class RTL8139 : public Dev::NetDevice {
     public:
     RTL8139(PCI::PCIDevice* device, const char* name)
         : NetDevice(name, Net::link_type_t::LINK_ETHERNET) {
-        _tx_buffers = (uint8_t*) VMem::kernel_pagemap->allocContinuous(2048 * 4);
-        _rx_buffer  = (uint8_t*) VMem::kernel_pagemap->allocContinuous(BUFFER_SIZE + 1500);
+        _tx_buffers = (uint8_t*) Mem::kernel_pagemap->allocContinuous(2048 * 4);
+        _rx_buffer  = (uint8_t*) Mem::kernel_pagemap->allocContinuous(BUFFER_SIZE + 1500);
 
         for (int i = 5; i >= 0; i--) {
             auto resource = device->getResource(i);
@@ -112,11 +110,11 @@ class RTL8139 : public Dev::NetDevice {
         while (CPU::inportb(_io_base + CMD) & CMD_RST)
             Proc::Thread::yield();
 
-        uint32_t tx_paddr = VMem::kernel_pagemap->paddrof(_tx_buffers);
+        uint32_t tx_paddr = Mem::kernel_pagemap->paddrof(_tx_buffers);
         if (tx_paddr > 0xFFFFFFFF)
             kpanic("rtl8139: TX buffer address > 4gb");
 
-        uint32_t rx_paddr = VMem::kernel_pagemap->paddrof(_rx_buffer);
+        uint32_t rx_paddr = Mem::kernel_pagemap->paddrof(_rx_buffer);
         if (rx_paddr > 0xFFFFFFFF)
             kpanic("rtl8139: RX buffer address > 4gb");
 

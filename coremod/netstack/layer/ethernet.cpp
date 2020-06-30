@@ -1,7 +1,7 @@
 #include "layer/ethernet.hpp"
 
-#include "aex/dev/netdevice.hpp"
-#include "aex/endian.hpp"
+#include "aex/byte.hpp"
+#include "aex/dev.hpp"
 #include "aex/printk.hpp"
 
 #include "rx_core.hpp"
