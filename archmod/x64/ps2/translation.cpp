@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 
-using namespace AEX::Dev;
+using namespace AEX::Dev::Input;
 
 uint8_t translation_normal[256] = {
     [0x00] = 0,
@@ -25,10 +25,10 @@ uint8_t translation_normal[256] = {
     [0x0F] = 0,
 
     [0x10] = 0,
-    [0x11] = 0,
-    [0x12] = 0,
+    [0x11] = KEY_LEFTALT,
+    [0x12] = KEY_LEFTSHIFT,
     [0x13] = 0,
-    [0x14] = 0,
+    [0x14] = KEY_LEFTCTRL,
     [0x15] = KEY_Q,
     [0x16] = KEY_1,
     [0x17] = 0,
@@ -101,7 +101,7 @@ uint8_t translation_normal[256] = {
     [0x56] = 0,
     [0x57] = 0,
     [0x58] = KEY_CAPSLOCK,
-    [0x59] = 0,
+    [0x59] = KEY_RIGHTSHIFT,
     [0x5A] = KEY_RETURN,
     [0x5B] = KEY_RIGHTBRACE,
     [0x5C] = 0,
@@ -176,4 +176,57 @@ uint8_t translation_normal[256] = {
     [0x0D] = 0,
     [0x0E] = 0,
     [0x0F] = 0,*/
+};
+
+uint8_t translation_extra[256] = {
+    [0x00] = 0,
+    [0x01] = 0,
+    [0x02] = 0,
+    [0x03] = 0,
+    [0x04] = 0,
+    [0x05] = 0,
+    [0x06] = 0,
+    [0x07] = 0,
+    [0x08] = 0,
+    [0x09] = 0,
+    [0x0A] = 0,
+    [0x0B] = 0,
+    [0x0C] = 0,
+    [0x0D] = 0,
+    [0x0E] = 0,
+    [0x0F] = 0,
+
+    [0x10] = 0,
+    [0x11] = KEY_RIGHTALT,
+    [0x12] = 0,
+    [0x13] = 0,
+    [0x14] = KEY_RIGHTCTRL,
+    [0x15] = 0,
+    [0x16] = 0,
+    [0x17] = 0,
+    [0x18] = 0,
+    [0x19] = 0,
+    [0x1A] = 0,
+    [0x1B] = 0,
+    [0x1C] = 0,
+    [0x1D] = 0,
+    [0x1E] = 0,
+    [0x1F] = 0,
+
+    [0x20] = 0,
+    [0x21] = 0,
+    [0x22] = 0,
+    [0x23] = 0,
+    [0x24] = 0,
+    [0x25] = 0,
+    [0x26] = 0,
+    [0x27] = 0,
+    [0x28] = 0,
+    [0x29] = 0,
+    [0x2A] = 0,
+    [0x2B] = 0,
+    [0x2C] = 0,
+    [0x2D] = 0,
+    [0x2E] = 0,
+    [0x2F] = 0,
 };
