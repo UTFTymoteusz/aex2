@@ -74,8 +74,7 @@ auto constexpr BUFFER_MASK = (BUFFER_SIZE - 0x10) - 4;
 
 class RTL8139 : public Dev::NetDevice {
     public:
-    RTL8139(PCI::PCIDevice* device, const char* name)
-        : NetDevice(name, Net::link_type_t::LINK_ETHERNET) {
+    RTL8139(PCI::PCIDevice* device, const char* name) : NetDevice(name, Net::LINK_ETHERNET) {
         _tx_buffers = (uint8_t*) Mem::kernel_pagemap->allocContinuous(2048 * 4);
         _rx_buffer  = (uint8_t*) Mem::kernel_pagemap->allocContinuous(BUFFER_SIZE + 1500);
 
@@ -143,7 +142,7 @@ class RTL8139 : public Dev::NetDevice {
 
     error_t send(const void* buffer, size_t len) {
         if (len < 16)
-            return error_t::EINVAL; // change this later pls
+            return EINVAL; // change this later pls
 
         auto scopeLock = ScopeSpinlock(_tx_lock);
 
@@ -162,7 +161,7 @@ class RTL8139 : public Dev::NetDevice {
         if (_current_tx_buffer == 4)
             _current_tx_buffer = 0;
 
-        return error_t::ENONE;
+        return ENONE;
     }
 
     private:

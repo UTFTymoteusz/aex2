@@ -45,17 +45,17 @@ namespace AEX::NetStack {
 
     optional<Socket*> TCPProtocol::createSocket(socket_type_t type) {
         if (type != socket_type_t::SOCK_STREAM)
-            return error_t::ESOCKTNOSUPPORT;
+            return ESOCKTNOSUPPORT;
 
         auto socket = new TCPSocket();
         if (!socket)
-            return error_t::ENOMEM;
+            return ENOMEM;
 
         uint16_t port = allocateDynamicPort();
         if (port == 0) {
             delete socket;
             // fix this pls
-            return error_t::ENOMEM;
+            return ENOMEM;
         }
 
         socket->source_port = port;

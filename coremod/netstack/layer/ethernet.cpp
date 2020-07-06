@@ -15,13 +15,13 @@ using namespace AEX::Net;
 namespace AEX::NetStack {
     error_t EthernetLayer::parse(int device_id, const void* packet_ptr, size_t len) {
         if (len < sizeof(ethernet_header))
-            return error_t::EINVAL;
+            return EINVAL;
 
         auto header  = (ethernet_header*) packet_ptr;
         auto net_dev = Dev::get_net_device(device_id);
 
         if (header->destination != net_dev->info.ipv4.mac && !header->destination.isBroadcast())
-            return error_t::EINVAL;
+            return EINVAL;
 
         switch ((uint16_t) header->ethertype) {
         case ethertype_t::ETH_ARP:
@@ -38,7 +38,7 @@ namespace AEX::NetStack {
             break;
         }
 
-        return error_t::ENONE;
+        return ENONE;
     }
 
     packet_buffer* EthernetLayer::encapsulate(mac_addr source, mac_addr dest, ethertype_t type) {

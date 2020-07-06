@@ -16,6 +16,7 @@
 // clang-format on
 
 using namespace AEX;
+using namespace AEX::Net;
 
 const char* MODULE_NAME = "netstack";
 
@@ -37,8 +38,8 @@ void module_enter() {
     loopback_dev->setIPv4Mask(Net::ipv4_addr(255, 0, 0, 0));
     loopback_dev->setMetric(1000000);
 
-    Net::register_link_layer(Net::link_type_t::LINK_NONE, new NetStack::NoneLayer());
-    Net::register_link_layer(Net::link_type_t::LINK_ETHERNET, new NetStack::EthernetLayer());
+    Net::register_link_layer(Net::LINK_NONE, new NetStack::NoneLayer());
+    Net::register_link_layer(Net::LINK_ETHERNET, new NetStack::EthernetLayer());
 
     Net::register_inet_protocol(socket_protocol_t::IPROTO_TCP, new NetStack::TCPProtocol());
     Net::register_inet_protocol(socket_protocol_t::IPROTO_UDP, new NetStack::UDPProtocol());

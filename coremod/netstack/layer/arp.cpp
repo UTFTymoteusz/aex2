@@ -126,7 +126,7 @@ namespace AEX::NetStack {
         Proc::Thread::yield();
 
         if (!_promise->success)
-            return error_t::EHOSTUNREACH;
+            return EHOSTUNREACH;
 
         _arp_table_lock.acquire();
         uptime = Sys::get_uptime();

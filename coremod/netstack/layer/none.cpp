@@ -11,7 +11,7 @@ namespace AEX::NetStack {
         len -= sizeof(ethertype_t);
 
         queue_rx_packet(device_id, ethertype, packet_ptr, len);
-        return error_t::ENONE;
+        return ENONE;
     }
 
     packet_buffer* NoneLayer::encapsulate(ethertype_t type) {

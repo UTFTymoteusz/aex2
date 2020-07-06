@@ -46,24 +46,24 @@ namespace AEX::NetStack {
     error_t UDPSocket::connect(const sockaddr* addr) {
         sockaddr_inet* _addr = (sockaddr_inet*) addr;
         if (_addr->domain != socket_domain_t::AF_INET)
-            return error_t::EINVAL;
+            return EINVAL;
 
         destination_address = _addr->addr;
         destination_port    = _addr->port;
 
         printk("udp: Connected a socket to port %i\n", _addr->port);
 
-        return error_t::ENONE;
+        return ENONE;
     }
 
 
     error_t UDPSocket::bind(const sockaddr* addr) {
         sockaddr_inet* _addr = (sockaddr_inet*) addr;
         if (_addr->domain != socket_domain_t::AF_INET)
-            return error_t::EINVAL;
+            return EINVAL;
 
         if (!UDPProtocol::allocatePort(_addr->port))
-            return error_t::EADDRINUSE;
+            return EADDRINUSE;
 
         if (this->source_port != 0)
             UDPProtocol::freePort(this->source_port);
@@ -73,13 +73,13 @@ namespace AEX::NetStack {
 
         printk("udp: Bound a socket to port %i\n", _addr->port);
 
-        return error_t::ENONE;
+        return ENONE;
     }
 
     optional<size_t> UDPSocket::sendTo(const void* buffer, size_t len, int flags,
                                        const sockaddr* dst_addr) {
         if (!buffer)
-            return error_t::EINVAL;
+            return EINVAL;
 
         Net::ipv4_addr addr;
         uint16_t       port;
@@ -92,7 +92,7 @@ namespace AEX::NetStack {
         }
         else {
             if (destination_port == 0)
-                return error_t::ENOTCONN;
+                return ENOTCONN;
 
             addr = destination_address;
             port = destination_port;
@@ -100,7 +100,7 @@ namespace AEX::NetStack {
 
         auto net_dev = get_interface_for_dst(addr);
         if (!net_dev.isValid())
-            return error_t::ENETUNREACH;
+            return ENETUNREACH;
 
         auto en_buffer =
             IPv4Layer::encapsulate(net_dev->info.ipv4.addr, addr, ipv4_protocol_t::IPv4_UDP,

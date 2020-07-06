@@ -40,13 +40,13 @@ namespace AEX::NetStack {
     error_t TCPSocket::connect(const sockaddr* addr) {
         sockaddr_inet* _addr = (sockaddr_inet*) addr;
         if (_addr->domain != socket_domain_t::AF_INET)
-            return error_t::EINVAL;
+            return EINVAL;
 
         _lock.acquire();
 
         if (_state != tcp_state_t::TCP_CLOSED) {
             _lock.release();
-            return error_t::EISCONN;
+            return EISCONN;
         }
 
         this->destination_address = _addr->addr;
@@ -87,7 +87,7 @@ namespace AEX::NetStack {
 
             if (_state == tcp_state_t::TCP_CLOSED) {
                 _lock.release();
-                return error_t::ECONNREFUSED;
+                return ECONNREFUSED;
             }
 
             _rx_event.wait();
@@ -98,17 +98,17 @@ namespace AEX::NetStack {
 
         _lock.release();
 
-        return error_t::ENONE;
+        return ENONE;
     }
 
 
     error_t TCPSocket::bind(const sockaddr* addr) {
         sockaddr_inet* _addr = (sockaddr_inet*) addr;
         if (_addr->domain != socket_domain_t::AF_INET)
-            return error_t::EINVAL;
+            return EINVAL;
 
         if (!TCPProtocol::allocatePort(_addr->port))
-            return error_t::EADDRINUSE;
+            return EADDRINUSE;
 
         if (this->source_port != 0)
             TCPProtocol::freePort(this->source_port);
@@ -118,19 +118,19 @@ namespace AEX::NetStack {
 
         printk("tcp: Bound a socket to port %i\n", _addr->port);
 
-        return error_t::ENONE;
+        return ENONE;
     }
 
     optional<size_t> TCPSocket::sendTo(const void* buffer, size_t len, int flags,
                                        const sockaddr* dst_addr) {
         if (!buffer)
-            return error_t::EINVAL;
+            return EINVAL;
 
         if (destination_port == 0)
-            return error_t::ENOTCONN;
+            return ENOTCONN;
 
         if (dst_addr)
-            return error_t::EISCONN;
+            return EISCONN;
 
         _lock.acquire();
 
@@ -152,7 +152,7 @@ namespace AEX::NetStack {
     optional<size_t> TCPSocket::receiveFrom(void* buffer, size_t len, int flags,
                                             sockaddr* src_addr) {
         if (src_addr)
-            return error_t::EISCONN;
+            return EISCONN;
 
         _lock.acquire();
 

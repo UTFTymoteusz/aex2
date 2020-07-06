@@ -54,7 +54,7 @@ namespace AEX::NetStack {
         packet_buffer* buffer = nullptr;
 
         switch (net_dev->link_type) {
-        case link_type_t::LINK_ETHERNET: {
+        case LINK_ETHERNET: {
             mac_addr mac;
 
             bool local = (net_dev->info.ipv4.addr & net_dev->info.ipv4.mask) ==
@@ -74,7 +74,7 @@ namespace AEX::NetStack {
             }
 
             if (!mac_found)
-                return local ? error_t::EHOSTDOWN : error_t::EHOSTUNREACH;
+                return local ? EHOSTDOWN : EHOSTUNREACH;
 
             buffer = EthernetLayer::encapsulate(net_dev->info.ipv4.mac, mac, ethertype_t::ETH_IPv4);
         } break;
