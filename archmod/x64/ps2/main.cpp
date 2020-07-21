@@ -51,7 +51,6 @@ class PS2 : public Tree::Driver {
         kb_init();
 
         byte = sendCommandGetResponse(PS2_CTRL_CMD_READ_CFG_BYTE);
-
         byte |= 0x3;
 
         sendCommand(PS2_CTRL_CMD_WRITE_CFG_BYTE, byte);

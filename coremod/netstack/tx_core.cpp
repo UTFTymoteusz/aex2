@@ -126,7 +126,7 @@ namespace AEX::NetStack {
 
     Dev::NetDevice_SP get_interface_by_srcaddr(Net::mac_addr mac) {
         for (auto iterator = Dev::devices.getIterator(); auto device = iterator.next();) {
-            if (device->type != Dev::dev_type_t::DEV_NET)
+            if (device->type != Dev::DEV_NET)
                 continue;
 
             auto net_dev = (Dev::NetDevice*) device;
@@ -141,7 +141,7 @@ namespace AEX::NetStack {
 
     Dev::NetDevice_SP get_interface_by_srcaddr(Net::ipv4_addr ipv4_addr) {
         for (auto iterator = Dev::devices.getIterator(); auto device = iterator.next();) {
-            if (device->type != Dev::dev_type_t::DEV_NET)
+            if (device->type != Dev::DEV_NET)
                 continue;
 
             auto net_dev = (Dev::NetDevice*) device;
@@ -159,7 +159,7 @@ namespace AEX::NetStack {
         int best_metric  = 23232323;
 
         for (auto iterator = Dev::devices.getIterator(); auto device = iterator.next();) {
-            if (device->type != Dev::dev_type_t::DEV_NET)
+            if (device->type != Dev::DEV_NET)
                 continue;
 
             auto net_dev = (Dev::NetDevice*) device;
