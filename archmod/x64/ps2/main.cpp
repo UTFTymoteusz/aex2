@@ -91,7 +91,13 @@ PS2* driver;
 
 void module_enter() {
     driver = new PS2();
-    Tree::register_driver("main", driver);
+
+    if (!Tree::register_driver("main", driver)) {
+        printk(PRINTK_WARN "ps2: Failed to register the driver\n");
+
+        delete driver;
+        return;
+    }
 }
 
 void module_exit() {}

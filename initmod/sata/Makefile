@@ -1,5 +1,4 @@
-MODULE_NAME  = testmod
-MODULE_ORDER = 99
+MODULE_NAME = sata
 
 CC = g++
 LD = ld
@@ -16,7 +15,7 @@ OBJS      := $(patsubst %.o, $(OBJ_DEST)%.o, $(CFILES:.cpp=.cpp.o))
 
 OBJS := $(OBJS)
 
-MODULE_OBJ = $(BIN)$(MODULE_NAME).$(MODULE_ORDER).km
+MODULE_OBJ = $(BIN)$(MODULE_NAME).km
 
 GFLAGS = -O3 -Wall -Wextra -nostdlib -pipe
 

@@ -8,8 +8,12 @@ using namespace AEX;
 
 const char* MODULE_NAME = "testmod";
 
+void test_mmap();
+
 void module_enter() {
     printk(PRINTK_WARN "testmod: Loaded\n");
+
+    test_mmap();
 }
 
 void module_exit() {
