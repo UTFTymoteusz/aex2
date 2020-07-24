@@ -1,6 +1,6 @@
 MODULE_NAME = sata
 
-CC = g++
+CXX ?= g++
 LD = ld
 
 MKDIR = mkdir -p
@@ -9,9 +9,9 @@ BIN  := bin/
 DEP_DEST := $(BIN)dep/
 OBJ_DEST := $(BIN)obj/
 
-CFILES    := $(shell find . -type f -name '*.cpp')
-HFILES    := $(shell find . -type f -name '*.hpp')
-OBJS      := $(patsubst %.o, $(OBJ_DEST)%.o, $(CFILES:.cpp=.cpp.o))
+CXXFILES  := $(shell find . -type f -name '*.cpp')
+HXXFILES  := $(shell find . -type f -name '*.hpp')
+OBJS      := $(patsubst %.o, $(OBJ_DEST)%.o, $(CXXFILES:.cpp=.cpp.o))
 
 OBJS := $(OBJS)
 
@@ -22,7 +22,7 @@ GFLAGS = -O3 -Wall -Wextra -nostdlib -pipe
 INCLUDES := -I. -I$(ARCH) -Iinclude/ -I../../kernel/include \
 		    -I../../kernel/arch/x64/include
 
-CCFLAGS := $(GFLAGS)     \
+CXXFLAGS := $(GFLAGS)     \
 	-std=c++17           \
 	-fno-rtti            \
 	-fno-exceptions      \
@@ -43,7 +43,7 @@ LDFLAGS := $(GFLAGS)        \
 
 format:
 	@$(MKDIR) $(BIN)
-	clang-format -style=file -i ${CFILES} ${HFILES}
+	clang-format -style=file -i ${CXXFILES} ${HXXFILES}
 
 all: $(OBJS)
 	@$(MKDIR) $(BIN)
@@ -60,4 +60,4 @@ clean:
 $(OBJ_DEST)%.cpp.o : %.cpp
 	@$(MKDIR) ${@D}
 	@$(MKDIR) $(dir $(DEP_DEST)$*)
-	$(CC) $(CCFLAGS) -c $< -o $@ -MMD -MT $@ -MF $(DEP_DEST)$*.cpp.d
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MMD -MT $@ -MF $(DEP_DEST)$*.cpp.d

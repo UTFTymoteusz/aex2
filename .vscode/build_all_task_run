@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# WSL being autistic    
+PATH=$PATH:/opt/cross/bin
+
+if which x86_64-aex2-elf-g++ ; then
+    make all iso run CXX="x86_64-aex2-elf-g++" CC="x86_64-aex2-elf-gcc" 
+else 
+    make all iso run        
+fi

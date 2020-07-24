@@ -1,10 +1,9 @@
 MODULE_NAME  = lai
 MODULE_ORDER = 00
 
-LAI_CC = gcc
-
-CC = g++
-LD = ld
+CXX ?= g++
+CC  ?= gcc
+LD   = ld
 
 MKDIR = mkdir -p
 
@@ -16,9 +15,9 @@ LAI_CFILES := $(shell find ./lai/ -type f -name '*.c')
 LAI_HFILES := $(shell find ./lai/ -type f -name '*.h')
 LAI_OBJS   := $(patsubst %.o, $(OBJ_DEST)%.o, $(LAI_CFILES:.c=.c.o))
 
-CFILES    := $(shell find . -type f -name '*.cpp')
-HFILES    := $(shell find . -type f -name '*.hpp')
-OBJS      := $(patsubst %.o, $(OBJ_DEST)%.o, $(CFILES:.cpp=.cpp.o))
+CXXFILES  := $(shell find . -type f -name '*.cpp')
+HXXFILES  := $(shell find . -type f -name '*.hpp')
+OBJS      := $(patsubst %.o, $(OBJ_DEST)%.o, $(CXXFILES:.cpp=.cpp.o))
 
 OBJS := $(OBJS) $(LAI_OBJS)
 
@@ -40,7 +39,7 @@ LAI_CCFLAGS := $(GFLAGS) \
 	-fno-stack-protector \
 	$(LAI_INCLUDES)
 
-CCFLAGS := $(GFLAGS)     \
+CXXFLAGS := $(GFLAGS)    \
 	-std=c++17           \
 	-fno-rtti            \
 	-fno-exceptions      \
@@ -77,9 +76,9 @@ clean:
 $(OBJ_DEST)%.cpp.o : %.cpp
 	@$(MKDIR) ${@D}
 	@$(MKDIR) $(dir $(DEP_DEST)$*)
-	$(CC) $(CCFLAGS) -c $< -o $@ -MMD -MT $@ -MF $(DEP_DEST)$*.cpp.d
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MMD -MT $@ -MF $(DEP_DEST)$*.cpp.d
 
 $(OBJ_DEST)%.c.o : %.c
 	@$(MKDIR) ${@D}
 	@$(MKDIR) $(dir $(DEP_DEST)$*)
-	$(LAI_CC) $(LAI_CCFLAGS) -c $< -o $@ -MMD -MT $@ -MF $(DEP_DEST)$*.c.d
+	$(CC) $(LAI_CCFLAGS) -c $< -o $@ -MMD -MT $@ -MF $(DEP_DEST)$*.c.d

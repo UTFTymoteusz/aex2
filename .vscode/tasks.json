@@ -6,7 +6,7 @@
         {
             "label": "build all task run",
             "type": "shell",
-            "command": "make all iso run",
+            "command": "./.vscode/build_all_task_run",
             "group": {
                 "kind": "build",
                 "isDefault": true
