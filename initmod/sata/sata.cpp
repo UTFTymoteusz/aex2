@@ -45,7 +45,7 @@ namespace AEX::Dev::SATA {
             }
 
             void* addr = Mem::kernel_pagemap->map(0x1000, paddr, PAGE_NOCACHE | PAGE_WRITE);
-            auto  ahci = new AHCI(addr, index);
+            auto  ahci = new AHCI(device, addr, index);
 
             index++;
 

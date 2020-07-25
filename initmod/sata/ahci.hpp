@@ -3,6 +3,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+namespace AEX::Dev::Tree {
+    class Device;
+}
+
 namespace AEX::Dev::SATA {
     class AHCI {
         public:
@@ -257,7 +261,7 @@ namespace AEX::Dev::SATA {
             uint8_t reserved[0x100 - 0xA0];
         } __attribute__((packed));
 
-        AHCI(void* addr, int index);
+        AHCI(Tree::Device* device, void* addr, int index);
 
         private:
         static constexpr auto POWER_MANAGEMENT_ACTIVE = 0x01;
@@ -267,6 +271,8 @@ namespace AEX::Dev::SATA {
         static constexpr auto SATA_SIG_ATAPI = 0xEB140101;
         static constexpr auto SATA_SIG_SEMB  = 0xC33C0101;
         static constexpr auto SATA_SIG_PM    = 0x96690101;
+
+        Tree::Device* _device;
 
         hba_t* hba;
         int    index;

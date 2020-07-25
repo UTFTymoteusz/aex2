@@ -38,7 +38,7 @@ namespace AEX::Dev::SATA {
 
         Spinlock _lock;
 
-        SATADevice(const char* name) : Device(name) {}
+        SATADevice(const char* name, Tree::Device* device) : Device(name, device) {}
 
         bool init();
 
