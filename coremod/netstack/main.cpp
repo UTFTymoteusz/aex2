@@ -1,36 +1,25 @@
 #include "aex/net.hpp"
-#include "aex/net/linklayer.hpp"
 #include "aex/printk.hpp"
 
-#include "layer/ethernet.hpp"
-#include "layer/none.hpp"
+#include "layer/link/arp.hpp"
+#include "layer/network/ipv4.hpp"
+#include "layer/transport/tcp.hpp"
 #include "loopbackdev.hpp"
-#include "protocol/tcp.hpp"
-#include "protocol/udp.hpp"
-#include "rx_core.hpp"
-#include "tx_core.hpp"
-
-// clang-format off
-#include "layer/arp.hpp"
-#include "aex/proc.hpp"
-// clang-format on
+#include "protocol/inet/tcp.hpp"
+#include "protocol/inet/udp.hpp"
 
 using namespace AEX;
 using namespace AEX::Net;
+using namespace NetStack;
 
 const char* MODULE_NAME = "netstack";
 
 void module_enter() {
-    NetStack::tx_init();
-    NetStack::rx_init();
+    ARPLayer::init();
+    IPv4Layer::init();
+    TCPLayer::init();
 
-    NetStack::ARPLayer::add_static_entry(Net::ipv4_addr(255, 255, 255, 255),
-                                         Net::mac_addr(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF));
-
-    NetStack::TCPProtocol::init();
-    NetStack::UDPProtocol::init();
-
-    auto loopback_dev = new NetStack::Loopback();
+    auto loopback_dev = new Loopback();
     if (!loopback_dev->registerDevice())
         kpanic("netstack: Failed to register the loopback device");
 
@@ -38,28 +27,11 @@ void module_enter() {
     loopback_dev->setIPv4Mask(Net::ipv4_addr(255, 0, 0, 0));
     loopback_dev->setMetric(1000000);
 
-    Net::register_link_layer(Net::LINK_NONE, new NetStack::NoneLayer());
-    Net::register_link_layer(Net::LINK_ETHERNET, new NetStack::EthernetLayer());
+    UDPProtocol::init();
+    TCPProtocol::init();
 
-    Net::register_inet_protocol(socket_protocol_t::IPROTO_TCP, new NetStack::TCPProtocol());
-    Net::register_inet_protocol(socket_protocol_t::IPROTO_UDP, new NetStack::UDPProtocol());
-
-    /*while (true) {
-        Proc::Thread::sleep(1000);
-        auto mac_try = NetStack::ARPLayer::query_ipv4(
-            NetStack::get_interface_by_srcaddr(ipv4_addr(192, 168, 0, 23)), ipv4_addr(192, 168, 0,
-    220));
-
-        if (!mac_try.has_value) {
-            printk("arp: Failed\n");
-            continue;
-        }
-
-        auto mac = mac_try.value;
-
-        printk("arp: Success: %02x:%02x:%02x:%02x:%02x:%02x\n", mac[0], mac[1], mac[2], mac[3],
-               mac[4], mac[5]);
-    }*/
+    register_inet_protocol(IPROTO_TCP, new TCPProtocol());
+    register_inet_protocol(IPROTO_UDP, new UDPProtocol());
 }
 
 void module_exit() {}

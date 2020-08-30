@@ -10,6 +10,11 @@
 #include "aex/proc.hpp"
 #include "aex/sys/irq.hpp"
 
+#include "netstack.hpp"
+#include "netstack/arp.hpp"
+#include "netstack/ethernet.hpp"
+#include "netstack/ipv4.hpp"
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -80,7 +85,7 @@ class RTL8139 : public Dev::NetDevice {
 
         for (int i = 5; i >= 0; i--) {
             auto resource = device->getResource(i);
-            if (!resource.has_value)
+            if (!resource)
                 continue;
 
             if (resource.value.type == Tree::Device::resource::type_t::IO)
@@ -140,7 +145,7 @@ class RTL8139 : public Dev::NetDevice {
         printk(PRINTK_OK "rtl8139: %s: Ready\n", name);
     }
 
-    error_t send(const void* buffer, size_t len) {
+    error_t send(const void* buffer, size_t len, Net::net_type_t type) {
         if (len < 16)
             return EINVAL; // change this later pls
 
@@ -148,20 +153,92 @@ class RTL8139 : public Dev::NetDevice {
 
         len = min<size_t>(len, 1792);
 
-        uint16_t io_port = _io_base + TSD0 + 4 * _current_tx_buffer;
+        uint16_t io_port = _io_base + TSD0 + 4 * _tx_buffer_current;
+        while (!(CPU::inportd(io_port) & TSD_OWN)) {
+            _tx_lock.release();
+            _tx_lock.acquire();
+        }
 
-        while (!(CPU::inportd(io_port) & TSD_OWN))
-            ;
+        uint8_t* tx_buffer = _tx_buffers + 2048 * _tx_buffer_current;
 
-        memcpy(_tx_buffers + 2048 * _current_tx_buffer, buffer, len);
+        switch (type) {
+        case Net::NET_ARP: {
+            auto frame = (NetStack::ethernet_frame*) tx_buffer;
+            auto arp   = (NetStack::arp_packet*) buffer;
+
+            frame->destination = arp->header.operation != NetStack::ARP_REQUEST
+                                     ? arp->eth_ipv4.destination_mac
+                                     : Net::mac_addr(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
+            frame->source    = this->info.ipv4.mac;
+            frame->ethertype = NetStack::ETH_ARP;
+
+            memcpy(frame->payload, buffer, len);
+
+            len += sizeof(NetStack::ethernet_frame);
+        } break;
+        case Net::NET_IPv4: {
+            auto frame = (NetStack::ethernet_frame*) tx_buffer;
+            auto ipv4  = (NetStack::ipv4_header*) buffer;
+
+            if (ipv4->destination == info.ipv4.broadcast ||
+                ipv4->destination == NetStack::IPv4_BROADCAST) {
+                frame->destination = Net::mac_addr(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
+            }
+            else {
+                auto arp_addr = ipv4->destination.isSubnettedWith(info.ipv4.addr, info.ipv4.mask)
+                                    ? ipv4->destination
+                                    : info.ipv4.gateway;
+                auto mac_try = NetStack::arp_get_mac(arp_addr);
+                if (!mac_try)
+                    return EAGAIN;
+
+                frame->destination = mac_try.value;
+            }
+
+            frame->source    = info.ipv4.mac;
+            frame->ethertype = NetStack::ETH_IPv4;
+
+            memcpy(frame->payload, buffer, len);
+
+            len += sizeof(NetStack::ethernet_frame);
+        } break;
+        default:
+            break;
+        }
 
         CPU::outportd(io_port, len);
 
-        _current_tx_buffer++;
-        if (_current_tx_buffer == 4)
-            _current_tx_buffer = 0;
+        _tx_buffer_current++;
+        if (_tx_buffer_current == 4)
+            _tx_buffer_current = 0;
 
         return ENONE;
+    }
+
+    void receive(const void* buffer, size_t len) {
+        if (len < sizeof(NetStack::ethernet_frame))
+            return;
+
+        auto frame = (NetStack::ethernet_frame*) buffer;
+
+        if (!frame->destination.isBroadcast() && frame->destination != this->info.ipv4.mac)
+            return;
+
+        len -= sizeof(NetStack::ethernet_frame);
+
+        switch ((uint16_t) frame->ethertype) {
+        case NetStack::ETH_ARP:
+            NetStack::arp_received(id, frame->payload, len);
+            break;
+        case NetStack::ETH_IPv4:
+            NetStack::ipv4_received(id, frame->payload, len);
+            break;
+        case NetStack::ETH_IPv6:
+            NetStack::ipv6_received(id, frame->payload, len);
+            break;
+        default:
+            break;
+        }
     }
 
     private:
@@ -172,14 +249,12 @@ class RTL8139 : public Dev::NetDevice {
 
     uint32_t _io_base;
 
-    uint8_t* _tx_buffers = nullptr;
-    uint8_t* _rx_buffer  = nullptr;
-
-    size_t _rx_buffer_pos = 0;
+    uint8_t* _tx_buffers        = nullptr;
+    uint8_t  _tx_buffer_current = 0;
+    uint8_t* _rx_buffer         = nullptr;
+    size_t   _rx_buffer_pos     = 0;
 
     uint8_t _irq;
-
-    uint8_t _current_tx_buffer = 0;
 
     Spinlock _tx_lock;
 
@@ -215,7 +290,7 @@ class RTL8139 : public Dev::NetDevice {
     void packetReceived() {
         while (_rx_buffer_pos != CPU::inportw(_io_base + CBR)) {
             auto frame = (rx_frame*) (&_rx_buffer[_rx_buffer_pos]);
-            if (!frame->flags & 0x01)
+            if (!(frame->flags & 0x01))
                 break;
 
             uint16_t frame_len = frame->len;

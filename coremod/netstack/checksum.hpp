@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 
-namespace AEX::NetStack {
+namespace NetStack {
     inline uint32_t sum_bytes(const void* buffer, uint16_t len) {
         uint32_t  total = 0;
         uint16_t* bong  = (uint16_t*) buffer;
@@ -22,6 +22,6 @@ namespace AEX::NetStack {
         while (total >> 16)
             total = (total & 0xFFFF) + (total >> 16);
 
-        return from_big_endian<uint16_t>((uint16_t) ~total);
+        return AEX::from_big_endian<uint16_t>((uint16_t) ~total);
     }
 }

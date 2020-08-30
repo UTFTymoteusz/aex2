@@ -13,5 +13,19 @@
         "cstdarg": "cpp",
         "cstdint": "cpp"
     },
-    "C_Cpp.errorSquiggles": "Disabled"
+    "C_Cpp.errorSquiggles": "Disabled",
+    "clang-tidy.compilerArgs": [
+        "-std=c++17",
+        "-Icoremod/lai/",
+        "-Icoremod/netstack/",
+        "-Icoremod/netstack/include/",
+        "-Icoremod/rtl8139/",
+        "-Iinitmod/iso9660/",
+        "-Iinitmod/sata/",
+        "-Ikernel/",
+        "-Ikernel/arch/x64/",
+        "-Ikernel/arch/x64/include/",
+        "-Ikernel/include/",
+        "-checks=*",
+    ],
 }

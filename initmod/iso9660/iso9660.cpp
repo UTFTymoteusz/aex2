@@ -27,14 +27,14 @@ namespace AEX::FS {
             return EINVAL;
 
         auto info = File::info(source);
-        if (!info.has_value)
+        if (!info)
             return info.error_code;
 
         if (!info.value.is_block())
             return ENOTBLK;
 
         auto block = (Dev::BlockDevice_SP) Dev::devices.get(info.value.dev_id);
-        if (!block.isValid())
+        if (!block)
             return ENOENT;
 
         iso9660_dentry root_dentry;
