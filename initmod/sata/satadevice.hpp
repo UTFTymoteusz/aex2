@@ -4,7 +4,7 @@
 
 #include "ahci.hpp"
 
-namespace AEX::Dev::SATA {
+namespace AEX::Sys::SATA {
     class AHCI;
 
     enum sata_type_t {
@@ -14,7 +14,7 @@ namespace AEX::Dev::SATA {
         SATA_PM    = 3,
     };
 
-    class SATADevice : public Tree::Device {
+    class SATADevice : public Dev::Tree::Device {
         public:
         static constexpr auto PxCMD_CR  = 0x8000;
         static constexpr auto PxCMD_FR  = 0x4000;
@@ -38,7 +38,7 @@ namespace AEX::Dev::SATA {
 
         Spinlock m_lock;
 
-        SATADevice(const char* name, Tree::Device* device) : Device(name, device) {}
+        SATADevice(const char* name, Dev::Tree::Device* device) : Device(name, device) {}
 
         bool init();
 

@@ -4,12 +4,12 @@ using namespace AEX;
 
 const char* MODULE_NAME = "sata";
 
-namespace AEX::Dev::SATA {
+namespace AEX::Sys::SATA {
     void init();
 }
 
 void module_enter() {
-    Dev::SATA::init();
+    Sys::SATA::init();
 }
 
 void module_exit() {

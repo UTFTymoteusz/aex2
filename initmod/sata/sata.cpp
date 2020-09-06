@@ -1,14 +1,17 @@
-#include "aex/dev/pci.hpp"
 #include "aex/dev/tree.hpp"
 #include "aex/mem.hpp"
 #include "aex/printk.hpp"
+#include "aex/sys/pci.hpp"
 
 #include "ahci.hpp"
 
 #include <stddef.h>
 #include <stdint.h>
 
-namespace AEX::Dev::SATA {
+using namespace AEX::Dev;
+using namespace AEX::Sys::PCI;
+
+namespace AEX::Sys::SATA {
     extern void sd_init();
     extern void sr_init();
 
@@ -18,7 +21,7 @@ namespace AEX::Dev::SATA {
         ~SATA() {}
 
         bool check(Tree::Device* device) {
-            auto pci_device = (PCI::PCIDevice*) device;
+            auto pci_device = (PCIDevice*) device;
 
             if (pci_device->p_class != 0x01 || pci_device->subclass != 0x06 ||
                 pci_device->prog_if != 0x01)
@@ -29,8 +32,7 @@ namespace AEX::Dev::SATA {
 
         void bind(Tree::Device* device) {
             init();
-
-            PCI::set_busmaster(device, true);
+            set_busmaster(device, true);
 
             Mem::Phys::phys_addr paddr = 0;
 

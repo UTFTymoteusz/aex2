@@ -1,7 +1,6 @@
 #include "aex/arch/sys/cpu.hpp"
 #include "aex/debug.hpp"
 #include "aex/dev.hpp"
-#include "aex/dev/pci.hpp"
 #include "aex/dev/tree.hpp"
 #include "aex/math.hpp"
 #include "aex/mem.hpp"
@@ -9,6 +8,7 @@
 #include "aex/printk.hpp"
 #include "aex/proc.hpp"
 #include "aex/sys/irq.hpp"
+#include "aex/sys/pci.hpp"
 
 #include "netstack.hpp"
 #include "netstack/arp.hpp"
@@ -20,6 +20,7 @@
 
 using namespace AEX;
 using namespace AEX::Dev;
+using namespace AEX::Sys::PCI;
 
 using CPU = AEX::Sys::CPU;
 
@@ -79,7 +80,7 @@ auto constexpr BUFFER_MASK = (BUFFER_SIZE - 0x10) - 4;
 
 class RTL8139 : public Dev::NetDevice {
     public:
-    RTL8139(PCI::PCIDevice* device, const char* name) : NetDevice(name, Net::LINK_ETHERNET) {
+    RTL8139(PCIDevice* device, const char* name) : NetDevice(name, Net::LINK_ETHERNET) {
         m_tx_buffers = (uint8_t*) Mem::kernel_pagemap->allocContinuous(2048 * 4);
         m_rx_buffer  = (uint8_t*) Mem::kernel_pagemap->allocContinuous(BUFFER_SIZE + 1500);
 
@@ -88,7 +89,7 @@ class RTL8139 : public Dev::NetDevice {
             if (!resource)
                 continue;
 
-            if (resource.value.type == Tree::Device::resource::type_t::IO)
+            if (resource.value.type == Tree::Device::resource::IO)
                 m_io_base = resource.value.start;
         }
 
@@ -310,7 +311,7 @@ class RTL8139Driver : public Tree::Driver {
     ~RTL8139Driver() {}
 
     bool check(Tree::Device* device) {
-        auto pci_device = (PCI::PCIDevice*) device;
+        auto pci_device = (PCIDevice*) device;
 
         if (pci_device->p_class != 0x02 || pci_device->subclass != 0x00 ||
             pci_device->vendor_id != 0x10EC || pci_device->device_id != 0x8139)
@@ -320,9 +321,9 @@ class RTL8139Driver : public Tree::Driver {
     }
 
     void bind(Tree::Device* device) {
-        auto pci_device = (PCI::PCIDevice*) device;
+        auto pci_device = (PCIDevice*) device;
 
-        PCI::set_busmaster(pci_device, true);
+        set_busmaster(pci_device, true);
 
         char buffer[32];
         Dev::name_number_increment(buffer, sizeof(buffer), "eth%");

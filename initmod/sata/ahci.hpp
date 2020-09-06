@@ -1,6 +1,6 @@
 #pragma once
 
-#include "aex/macros.hpp"
+#include "aex/utility.hpp"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -9,7 +9,7 @@ namespace AEX::Dev::Tree {
     class Device;
 }
 
-namespace AEX::Dev::SATA {
+namespace AEX::Sys::SATA {
     class AHCI {
         public:
         typedef volatile uint32_t vuint32_t;
@@ -263,7 +263,7 @@ namespace AEX::Dev::SATA {
             uint8_t reserved[0x100 - 0xA0];
         } PACKED;
 
-        AHCI(Tree::Device* device, void* addr, int index);
+        AHCI(Dev::Tree::Device* device, void* addr, int index);
 
         private:
         static constexpr auto POWER_MANAGEMENT_ACTIVE = 0x01;
@@ -274,7 +274,7 @@ namespace AEX::Dev::SATA {
         static constexpr auto SATA_SIG_SEMB  = 0xC33C0101;
         static constexpr auto SATA_SIG_PM    = 0x96690101;
 
-        Tree::Device* m_device;
+        Dev::Tree::Device* m_device;
 
         hba_t* hba;
         int    index;

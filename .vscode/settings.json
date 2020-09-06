@@ -11,7 +11,8 @@
         "typeinfo": "cpp",
         "exception": "cpp",
         "cstdarg": "cpp",
-        "cstdint": "cpp"
+        "cstdint": "cpp",
+        "array": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "clang-tidy.compilerArgs": [

@@ -5,7 +5,9 @@
 
 #include "satadevice.hpp"
 
-namespace AEX::Dev::SATA {
+using namespace AEX::Dev;
+
+namespace AEX::Sys::SATA {
     class SRBlock : public BlockDevice {
         public:
         SRBlock(SATADevice* device)

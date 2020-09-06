@@ -3,7 +3,9 @@
 
 #include "satadevice.hpp"
 
-namespace AEX::Dev::SATA {
+using namespace AEX::Dev;
+
+namespace AEX::Sys::SATA {
     class SDDriver : public Tree::Driver {
         public:
         SDDriver() : Driver("sd") {}

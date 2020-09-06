@@ -7,7 +7,9 @@
 
 #include "satadevice.hpp"
 
-namespace AEX::Dev::SATA {
+using namespace AEX::Dev;
+
+namespace AEX::Sys::SATA {
     AHCI::AHCI(Tree::Device* device, void* addr, int index) {
         this->hba      = (hba_t*) addr;
         this->index    = index;

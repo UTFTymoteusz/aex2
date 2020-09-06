@@ -1,5 +1,4 @@
 #include "aex/arch/sys/cpu.hpp"
-#include "aex/dev/pci.hpp"
 #include "aex/kpanic.hpp"
 #include "aex/mem.hpp"
 #include "aex/module.hpp"
@@ -7,6 +6,7 @@
 #include "aex/proc.hpp"
 #include "aex/string.hpp"
 #include "aex/sys/acpi.hpp"
+#include "aex/sys/pci.hpp"
 
 #include "lai/core.h"
 #include "lai/helpers/pci.h"
@@ -19,6 +19,7 @@
 
 using namespace AEX;
 using namespace AEX::Mem;
+using namespace AEX::Sys;
 
 const char* MODULE_NAME = "lai";
 
@@ -114,32 +115,32 @@ extern "C" uint32_t laihost_ind(uint16_t port) {
 
 extern "C" void laihost_pci_writeb(uint16_t, uint8_t bus, uint8_t slot, uint8_t fun,
                                    uint16_t offset, uint8_t val) {
-    Dev::PCI::write_byte(bus, slot, fun, offset, val);
+    PCI::write_byte(bus, slot, fun, offset, val);
 }
 
 extern "C" void laihost_pci_writew(uint16_t, uint8_t bus, uint8_t slot, uint8_t fun,
                                    uint16_t offset, uint16_t val) {
-    Dev::PCI::write_word(bus, slot, fun, offset, val);
+    PCI::write_word(bus, slot, fun, offset, val);
 }
 
 extern "C" void laihost_pci_writed(uint16_t, uint8_t bus, uint8_t slot, uint8_t fun,
                                    uint16_t offset, uint32_t val) {
-    Dev::PCI::write_dword(bus, slot, fun, offset, val);
+    PCI::write_dword(bus, slot, fun, offset, val);
 }
 
 extern "C" uint8_t laihost_pci_readb(uint16_t, uint8_t bus, uint8_t slot, uint8_t fun,
                                      uint16_t offset) {
-    return Dev::PCI::read_byte(bus, slot, fun, offset);
+    return PCI::read_byte(bus, slot, fun, offset);
 }
 
 extern "C" uint16_t laihost_pci_readw(uint16_t, uint8_t bus, uint8_t slot, uint8_t fun,
                                       uint16_t offset) {
-    return Dev::PCI::read_word(bus, slot, fun, offset);
+    return PCI::read_word(bus, slot, fun, offset);
 }
 
 extern "C" uint32_t laihost_pci_readd(uint16_t, uint8_t bus, uint8_t slot, uint8_t fun,
                                       uint16_t offset) {
-    return Dev::PCI::read_dword(bus, slot, fun, offset);
+    return PCI::read_dword(bus, slot, fun, offset);
 }
 
 

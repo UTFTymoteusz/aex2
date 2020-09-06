@@ -6,7 +6,9 @@
 #include "aex/mem.hpp"
 #include "aex/printk.hpp"
 
-namespace AEX::Dev::SATA {
+using namespace AEX::Dev;
+
+namespace AEX::Sys::SATA {
     bool SATADevice::init() {
         int slot = findSlot();
 
