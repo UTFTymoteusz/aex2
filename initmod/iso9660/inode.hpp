@@ -14,10 +14,10 @@ namespace AEX::FS {
     class ISO9600DirectoryINode : public INode {
         public:
         ISO9600DirectoryINode(iso9660_dentry dentry) {
-            _dentry = dentry;
+            m_dentry = dentry;
 
             size = dentry.data_len.le;
-            type = FILE_DIRECTORY;
+            type = FT_DIRECTORY;
         }
 
         optional<dir_entry> readDir(dir_context* ctx) {
@@ -30,7 +30,7 @@ namespace AEX::FS {
             uint8_t buffer[256];
 
             while (ctx->pos < size) {
-                control_block->block_dev->read(buffer, _dentry.data_lba.le * BLOCK_SIZE + ctx->pos,
+                control_block->block_dev->read(buffer, m_dentry.data_lba.le * BLOCK_SIZE + ctx->pos,
                                                sizeof(buffer));
 
                 auto ldentry = (iso9660_dentry*) buffer;
@@ -80,7 +80,7 @@ namespace AEX::FS {
 
                 auto dentry_ret = dir_entry(name_buffer, ctx->pos - len, ldentry->data_lba.le);
 
-                dentry_ret.type = ldentry->isDirectory() ? FILE_DIRECTORY : FILE_REGULAR;
+                dentry_ret.type = ldentry->isDirectory() ? FT_DIRECTORY : FT_REGULAR;
 
                 return dentry_ret;
             }
@@ -89,7 +89,7 @@ namespace AEX::FS {
         }
 
         private:
-        iso9660_dentry _dentry;
+        iso9660_dentry m_dentry;
 
         void clean_name(char* buffer) {
             for (int i = 0; i < Path::MAX_FILENAME_LEN; i++) {
@@ -104,17 +104,17 @@ namespace AEX::FS {
     class ISO9600FileINode : public INode {
         public:
         ISO9600FileINode(iso9660_dentry dentry) {
-            _dentry = dentry;
+            m_dentry = dentry;
 
             size = dentry.data_len.le;
-            type = FILE_REGULAR;
+            type = FT_REGULAR;
         }
 
         error_t readBlocks(void* buffer, uint64_t block, uint16_t count) {
             uint16_t block_size = control_block->block_size;
 
             control_block->block_dev->read(
-                buffer, _dentry.data_lba.le * block_size + block * block_size, count * block_size);
+                buffer, m_dentry.data_lba.le * block_size + block * block_size, count * block_size);
 
             return ENONE;
         }
@@ -124,7 +124,7 @@ namespace AEX::FS {
         }
 
         private:
-        iso9660_dentry _dentry;
+        iso9660_dentry m_dentry;
 
         friend class ISO9660ControlBlock;
     };

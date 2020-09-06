@@ -36,7 +36,7 @@ namespace AEX::Dev::SATA {
         AHCI::hba_command_table*  command_tables;
         AHCI::hba_fis*            fis;
 
-        Spinlock _lock;
+        Spinlock m_lock;
 
         SATADevice(const char* name, Tree::Device* device) : Device(name, device) {}
 
@@ -55,7 +55,7 @@ namespace AEX::Dev::SATA {
         void scsiPacket(uint8_t* packet, void* buffer, int len);
 
         private:
-        volatile uint32_t _command_slots;
+        volatile uint32_t m_command_slots;
 
         AHCI::hba_command_header* getHeader(int slot);
         AHCI::hba_command_table*  getTable(int slot);

@@ -39,15 +39,15 @@ namespace NetStack {
             uint8_t buffer[];
         };
 
-        size_t _buffered_size = 0;
+        size_t m_buffered_size = 0;
 
-        datagram* _first_datagram = nullptr;
-        datagram* _last_datagram  = nullptr;
+        datagram* m_first_datagram = nullptr;
+        datagram* m_last_datagram  = nullptr;
 
-        AEX::Spinlock         _lock;
-        AEX::IPC::SimpleEvent _event;
+        AEX::Spinlock         m_lock;
+        AEX::IPC::SimpleEvent m_event;
 
-        bool _non_blocking = false;
+        bool m_non_blocking = false;
 
         void packetReceived(AEX::Net::ipv4_addr src, uint16_t src_port, const uint8_t* buffer,
                             uint16_t len);

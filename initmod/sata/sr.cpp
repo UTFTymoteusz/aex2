@@ -10,13 +10,13 @@ namespace AEX::Dev::SATA {
         public:
         SRBlock(SATADevice* device)
             : BlockDevice(device->name, SECTOR_SIZE, device->sector_count, device->max_page_burst) {
-            _device = device;
+            m_device = device;
         }
 
         private:
         static constexpr auto SECTOR_SIZE = 2048;
 
-        SATADevice* _device;
+        SATADevice* m_device;
 
         int64_t readBlock(void* buffer, uint64_t sector, uint32_t sector_count) {
             readWrite(buffer, sector, sector_count, false);
@@ -35,7 +35,7 @@ namespace AEX::Dev::SATA {
             *((uint32_t*) &(packet[2])) = bswap(sector);
             *((uint32_t*) &(packet[6])) = bswap(sector_count);
 
-            _device->scsiPacket(packet, buffer, sector_count * SECTOR_SIZE);
+            m_device->scsiPacket(packet, buffer, sector_count * SECTOR_SIZE);
         }
     };
 
@@ -43,13 +43,13 @@ namespace AEX::Dev::SATA {
         public:
         SRDriver() : Driver("sr") {}
 
-        bool check(Tree::Device* _device) {
-            auto device = (SATADevice*) _device;
+        bool check(Tree::Device* m_device) {
+            auto device = (SATADevice*) m_device;
             return device->type == SATA_ATAPI;
         }
 
-        void bind(Tree::Device* _device) {
-            auto device = (SATADevice*) _device;
+        void bind(Tree::Device* m_device) {
+            auto device = (SATADevice*) m_device;
 
             auto block = new SRBlock(device);
             if (!block->registerDevice()) {

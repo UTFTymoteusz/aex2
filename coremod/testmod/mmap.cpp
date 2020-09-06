@@ -1,5 +1,6 @@
 #include "aex/mem/mmap.hpp"
 
+#include "aex/assert.hpp"
 #include "aex/mem/heap.hpp"
 #include "aex/mem/paging.hpp"
 #include "aex/mem/phys.hpp"
@@ -8,8 +9,6 @@
 using namespace AEX;
 
 void test_mmap() {
-    Proc::Thread::sleep(250);
-
     uint64_t frames;
     uint64_t heap;
 
@@ -45,11 +44,6 @@ void test_mmap() {
         }
     }
 
-    if (Mem::Phys::frames_available != frames)
-        kpanic("test_mmap(): Frame freeing failed (%li prev, %li now)", frames,
-               Mem::Phys::frames_available);
-
-    if (Mem::Heap::heap_allocated != heap)
-        kpanic("test_mmap(): Heap freeing failed (%li prev, %li now)", heap,
-               Mem::Heap::heap_allocated);
+    AEX_ASSERT(Mem::Phys::frames_available == frames);
+    AEX_ASSERT(Mem::Heap::heap_allocated == heap);
 }

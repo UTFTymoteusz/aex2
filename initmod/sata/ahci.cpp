@@ -9,9 +9,9 @@
 
 namespace AEX::Dev::SATA {
     AHCI::AHCI(Tree::Device* device, void* addr, int index) {
-        this->hba     = (hba_t*) addr;
-        this->index   = index;
-        this->_device = device;
+        this->hba      = (hba_t*) addr;
+        this->index    = index;
+        this->m_device = device;
 
         if (!Tree::bus_exists("sata"))
             new Tree::Bus("sata");
@@ -92,7 +92,7 @@ namespace AEX::Dev::SATA {
 
             name_letter_increment(name_buffer, sizeof(name_buffer), "sr%");
 
-            sata_device             = new SATADevice(name_buffer, _device);
+            sata_device             = new SATADevice(name_buffer, m_device);
             sata_device->controller = this;
             sata_device->type       = SATA_ATAPI;
             sata_device->atapi      = true;
@@ -120,7 +120,7 @@ namespace AEX::Dev::SATA {
 
             name_letter_increment(name_buffer, sizeof(name_buffer), "sd%");
 
-            sata_device             = new SATADevice(name_buffer, _device);
+            sata_device             = new SATADevice(name_buffer, m_device);
             sata_device->controller = this;
             sata_device->type       = SATA_ATA;
             sata_device->atapi      = false;

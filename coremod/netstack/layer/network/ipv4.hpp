@@ -34,12 +34,12 @@ namespace NetStack {
             uint16_t len  = 0;
         };
 
-        static AEX::Mem::Vector<retx_frame, 16, 16> _retx_queue;
-        static AEX::Spinlock                        _retx_queue_lock;
-        static uint32_t                             _retx_queue_size;
+        static AEX::Mem::Vector<retx_frame, 16, 16> m_retx_queue;
+        static AEX::Spinlock                        m_retx_queue_lock;
+        static uint32_t                             m_retx_queue_size;
 
-        static AEX::Proc::Thread_SP _loop_thread;
-        static AEX::IPC::Event      _loop_event;
+        static AEX::Proc::Thread_SP m_loop_thread;
+        static AEX::IPC::Event      m_loop_event;
 
         static void loop();
         static bool retx();

@@ -7,34 +7,34 @@
 #include "netstack/ethernet.hpp"
 
 namespace NetStack {
-    AEX::Mem::Vector<ARPTable::arp_entry, 16, 16> ARPTable::_entries;
-    AEX::Spinlock                                 ARPTable::_entries_lock;
-    AEX::Mem::Vector<ARPTable::arp_query, 8, 8>   ARPTable::_queries;
-    AEX::Spinlock                                 ARPTable::_queries_lock;
+    AEX::Mem::Vector<ARPTable::arp_entry, 16, 16> ARPTable::m_entries;
+    AEX::Spinlock                                 ARPTable::m_entries_lock;
+    AEX::Mem::Vector<ARPTable::arp_query, 8, 8>   ARPTable::m_queries;
+    AEX::Spinlock                                 ARPTable::m_queries_lock;
 
-    AEX::Proc::Thread_SP ARPTable::_loop_thread;
+    AEX::Proc::Thread_SP ARPTable::m_loop_thread;
 
     void ARPTable::init() {
-        auto thread  = new AEX::Proc::Thread(nullptr, (void*) loop,
+        auto thread   = new AEX::Proc::Thread(nullptr, (void*) loop,
                                             AEX::Proc::Thread::KERNEL_STACK_SIZE, nullptr);
-        _loop_thread = thread->getSmartPointer();
-        _loop_thread->start();
+        m_loop_thread = thread->getSmartPointer();
+        m_loop_thread->start();
     }
 
     AEX::optional<AEX::Net::mac_addr> ARPTable::get_mac(AEX::Net::ipv4_addr ipv4) {
-        auto     scopeLock = AEX::ScopeSpinlock(_entries_lock);
-        uint64_t time      = AEX::Sys::get_uptime();
+        AEX::ScopeSpinlock scopeLock(m_entries_lock);
+        uint64_t           time = AEX::Sys::Time::uptime();
 
 
-        for (int i = 0; i < _entries.count(); i++) {
-            auto& entry = _entries[i];
+        for (int i = 0; i < m_entries.count(); i++) {
+            auto& entry = m_entries[i];
 
             if (entry.uuid != to_arp_uuid(ARP_ETHERNET, ETH_IPv4))
                 continue;
 
             if (entry.ipv4 == ipv4) {
                 if (time - entry.set_at > ARP_TIMEOUT_NS) {
-                    _queries.erase(i);
+                    m_queries.erase(i);
                     break;
                 }
 
@@ -54,16 +54,16 @@ namespace NetStack {
     // need to make it actually look if we've been querying
     void ARPTable::set_mac(AEX::Net::ipv4_addr ipv4, AEX::Net::mac_addr mac) {
         {
-            auto scopeLock = AEX::ScopeSpinlock(_queries_lock);
+            AEX::ScopeSpinlock scopeLock(m_queries_lock);
 
-            for (int i = 0; i < _queries.count(); i++) {
-                auto& query = _queries[i];
+            for (int i = 0; i < m_queries.count(); i++) {
+                auto& query = m_queries[i];
 
                 if (query.uuid != to_arp_uuid(ARP_ETHERNET, ETH_IPv4))
                     continue;
 
                 if (query.ipv4 == ipv4) {
-                    _queries.erase(i);
+                    m_queries.erase(i);
                     i--;
 
                     continue;
@@ -71,10 +71,10 @@ namespace NetStack {
             }
         }
 
-        auto scopeLock = AEX::ScopeSpinlock(_entries_lock);
+        AEX::ScopeSpinlock scopeLock(m_entries_lock);
 
-        for (int i = 0; i < _entries.count(); i++) {
-            auto& entry = _entries[i];
+        for (int i = 0; i < m_entries.count(); i++) {
+            auto& entry = m_entries[i];
 
             if (entry.uuid != to_arp_uuid(ARP_ETHERNET, ETH_IPv4))
                 continue;
@@ -82,7 +82,7 @@ namespace NetStack {
             if (entry.ipv4 != ipv4)
                 continue;
 
-            entry.set_at   = AEX::Sys::get_uptime();
+            entry.set_at   = AEX::Sys::Time::uptime();
             entry.updating = false;
             entry.mac      = mac;
 
@@ -92,28 +92,28 @@ namespace NetStack {
         arp_entry entry;
 
         entry.uuid   = to_arp_uuid(ARP_ETHERNET, ETH_IPv4);
-        entry.set_at = AEX::Sys::get_uptime();
+        entry.set_at = AEX::Sys::Time::uptime();
 
         entry.ipv4 = ipv4;
         entry.mac  = mac;
 
-        _entries.pushBack(entry);
+        m_entries.pushBack(entry);
     }
 
     void ARPTable::loop() {
         while (true) {
-            uint64_t time = AEX::Sys::get_uptime();
+            uint64_t time = AEX::Sys::Time::uptime();
 
-            auto scopeLock = AEX::ScopeSpinlock(_queries_lock);
+            AEX::ScopeSpinlock scopeLock(m_queries_lock);
 
-            for (int i = 0; i < _queries.count(); i++) {
-                auto& query = _queries[i];
+            for (int i = 0; i < m_queries.count(); i++) {
+                auto& query = m_queries[i];
 
                 if (time < query.retry_at)
                     continue;
 
                 if (query.retries == ARP_RETRIES) {
-                    _queries.erase(i);
+                    m_queries.erase(i);
                     i--;
 
                     continue;
@@ -131,16 +131,16 @@ namespace NetStack {
     }
 
     void ARPTable::query_mac(AEX::Net::ipv4_addr ipv4) {
-        _queries_lock.acquire();
+        m_queries_lock.acquire();
 
-        for (int i = 0; i < _queries.count(); i++) {
-            auto& query = _queries[i];
+        for (int i = 0; i < m_queries.count(); i++) {
+            auto& query = m_queries[i];
 
             if (query.uuid != to_arp_uuid(ARP_ETHERNET, ETH_IPv4))
                 continue;
 
             if (query.ipv4 == ipv4) {
-                _queries_lock.release();
+                m_queries_lock.release();
                 return;
             }
         }
@@ -153,8 +153,8 @@ namespace NetStack {
 
         query.ipv4 = ipv4;
 
-        _queries.pushBack(query);
-        _queries_lock.release();
+        m_queries.pushBack(query);
+        m_queries_lock.release();
     }
 
     void ARPTable::send_mac_request(AEX::Net::ipv4_addr ipv4) {

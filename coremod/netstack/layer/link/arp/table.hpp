@@ -50,12 +50,12 @@ namespace NetStack {
             arp_query() {}
         };
 
-        static AEX::Mem::Vector<arp_entry, 16, 16> _entries;
-        static AEX::Spinlock                       _entries_lock;
-        static AEX::Mem::Vector<arp_query, 8, 8>   _queries;
-        static AEX::Spinlock                       _queries_lock;
+        static AEX::Mem::Vector<arp_entry, 16, 16> m_entries;
+        static AEX::Spinlock                       m_entries_lock;
+        static AEX::Mem::Vector<arp_query, 8, 8>   m_queries;
+        static AEX::Spinlock                       m_queries_lock;
 
-        static AEX::Proc::Thread_SP _loop_thread;
+        static AEX::Proc::Thread_SP m_loop_thread;
 
         static void loop();
 

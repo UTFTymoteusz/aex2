@@ -159,35 +159,35 @@ namespace NetStack {
             segment  seg;
             uint16_t async_id;
 
-            segment_retry(AEX::Net::Socket_SP _socket, AEX::Net::ipv4_addr _addr, uint16_t _port,
-                          segment* _seg)
-                : socket(_socket), seg(*_seg) {
-                addr = _addr;
-                port = _port;
+            segment_retry(AEX::Net::Socket_SP m_socket, AEX::Net::ipv4_addr m_addr, uint16_t m_port,
+                          segment* m_seg)
+                : socket(m_socket), seg(*m_seg) {
+                addr = m_addr;
+                port = m_port;
 
-                seg.data = (uint8_t*) AEX::Mem::Heap::malloc(_seg->len);
-                AEX::memcpy(seg.data, _seg->data, _seg->len);
+                seg.data = (uint8_t*) AEX::Mem::Heap::malloc(m_seg->len);
+                AEX::memcpy(seg.data, m_seg->data, m_seg->len);
 
-                async_id = ((TCPSocket*) _socket.get())->_async_id;
+                async_id = ((TCPSocket*) m_socket.get())->m_async_id;
             }
         };
 
-        AEX::Spinlock _lock;
+        AEX::Spinlock m_lock;
 
-        AEX::IPC::Event _tx_event = {};
-        AEX::IPC::Event _rx_event = {};
+        AEX::IPC::Event m_tx_event = {};
+        AEX::IPC::Event m_rx_event = {};
 
-        AEX::Mem::CircularBuffer _tx_buffer = AEX::Mem::CircularBuffer(TCP_TX_BUFFER_SIZE);
-        AEX::Mem::CircularBuffer _rx_buffer = AEX::Mem::CircularBuffer(TCP_RX_BUFFER_SIZE);
+        AEX::Mem::CircularBuffer m_tx_buffer = AEX::Mem::CircularBuffer(TCP_TX_BUFFER_SIZE);
+        AEX::Mem::CircularBuffer m_rx_buffer = AEX::Mem::CircularBuffer(TCP_RX_BUFFER_SIZE);
 
-        AEX::Mem::Vector<segment*, 16, 16>             _retransmission_queue;
-        AEX::Mem::Vector<tcp_listen_entry, 16, 16>*    _listen_queue = nullptr;
-        AEX::Mem::Vector<AEX::Net::Socket_SP, 16, 16>* _accept_queue = nullptr;
+        AEX::Mem::Vector<segment*, 16, 16>             m_retransmission_queue;
+        AEX::Mem::Vector<tcp_listen_entry, 16, 16>*    m_listen_queue = nullptr;
+        AEX::Mem::Vector<AEX::Net::Socket_SP, 16, 16>* m_accept_queue = nullptr;
 
-        tcp_block _block;
-        int       _listen_backlog;
+        tcp_block m_block;
+        int       m_listen_backlog;
 
-        uint16_t _async_id = 0;
+        uint16_t m_async_id = 0;
 
         static void readOptions(tcp_block* block, const uint8_t* buffer, uint16_t hdr_len);
 

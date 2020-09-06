@@ -34,44 +34,44 @@ namespace NetStack {
         if (source_port != 0)
             UDPProtocol::freePort(source_port);
 
-        while (_first_datagram) {
-            auto next = _first_datagram->next;
+        while (m_first_datagram) {
+            auto next = m_first_datagram->next;
 
-            Heap::free(_first_datagram);
+            Heap::free(m_first_datagram);
 
-            _first_datagram = next;
+            m_first_datagram = next;
         }
     }
 
     error_t UDPSocket::connect(const sockaddr* addr) {
-        sockaddr_inet* _addr = (sockaddr_inet*) addr;
-        if (_addr->domain != socket_domain_t::AF_INET)
+        sockaddr_inet* m_addr = (sockaddr_inet*) addr;
+        if (m_addr->domain != socket_domain_t::AF_INET)
             return EINVAL;
 
-        destination_address = _addr->addr;
-        destination_port    = _addr->port;
+        destination_address = m_addr->addr;
+        destination_port    = m_addr->port;
 
-        printk("udp: Connected a socket to port %i\n", _addr->port);
+        printk("udp: Connected a socket to port %i\n", m_addr->port);
 
         return ENONE;
     }
 
 
     error_t UDPSocket::bind(const sockaddr* addr) {
-        sockaddr_inet* _addr = (sockaddr_inet*) addr;
-        if (_addr->domain != socket_domain_t::AF_INET)
+        sockaddr_inet* m_addr = (sockaddr_inet*) addr;
+        if (m_addr->domain != socket_domain_t::AF_INET)
             return EINVAL;
 
-        if (!UDPProtocol::allocatePort(_addr->port))
+        if (!UDPProtocol::allocatePort(m_addr->port))
             return EADDRINUSE;
 
         if (this->source_port != 0)
             UDPProtocol::freePort(this->source_port);
 
-        this->source_address = _addr->addr;
-        this->source_port    = _addr->port;
+        this->source_address = m_addr->addr;
+        this->source_port    = m_addr->port;
 
-        printk("udp: Bound a socket to port %i\n", _addr->port);
+        printk("udp: Bound a socket to port %i\n", m_addr->port);
 
         return ENONE;
     }
@@ -85,10 +85,10 @@ namespace NetStack {
         uint16_t       port;
 
         if (dst_addr) {
-            auto _dst_addr = (sockaddr_inet*) dst_addr;
+            auto m_dst_addr = (sockaddr_inet*) dst_addr;
 
-            addr = _dst_addr->addr;
-            port = _dst_addr->port;
+            addr = m_dst_addr->addr;
+            port = m_dst_addr->port;
         }
         else {
             if (destination_port == 0)
@@ -105,24 +105,24 @@ namespace NetStack {
         uint8_t  packet[IPv4Layer::encaps_len(sizeof(udp_header) + len)];
         uint8_t* payload = IPv4Layer::encapsulate(packet, sizeof(udp_header) + len, addr, IPv4_UDP);
 
-        auto _udp_header = (udp_header*) payload;
+        auto m_udp_header = (udp_header*) payload;
 
-        _udp_header->source_port      = this->source_port;
-        _udp_header->destination_port = port;
-        _udp_header->total_length     = len + sizeof(udp_header);
-        _udp_header->checksum         = 0x0000;
+        m_udp_header->source_port      = this->source_port;
+        m_udp_header->destination_port = port;
+        m_udp_header->total_length     = len + sizeof(udp_header);
+        m_udp_header->checksum         = 0x0000;
 
-        auto _fake_header = udp_fake_ipv4_header();
+        auto m_fake_header = udp_fake_ipv4_header();
 
-        _fake_header.source      = dev->info.ipv4.addr;
-        _fake_header.destination = destination_address;
-        _fake_header.zero        = 0x00;
-        _fake_header.protocol    = IPv4_UDP;
-        _fake_header.length      = len + sizeof(udp_header);
+        m_fake_header.source      = dev->info.ipv4.addr;
+        m_fake_header.destination = destination_address;
+        m_fake_header.zero        = 0x00;
+        m_fake_header.protocol    = IPv4_UDP;
+        m_fake_header.length      = len + sizeof(udp_header);
 
-        uint32_t sum = sum_bytes(&_fake_header, sizeof(udp_fake_ipv4_header)) +
-                       sum_bytes(_udp_header, sizeof(udp_header)) + sum_bytes(buffer, len);
-        _udp_header->checksum = to_checksum(sum);
+        uint32_t sum = sum_bytes(&m_fake_header, sizeof(udp_fake_ipv4_header)) +
+                       sum_bytes(m_udp_header, sizeof(udp_header)) + sum_bytes(buffer, len);
+        m_udp_header->checksum = to_checksum(sum);
 
         memcpy(payload + sizeof(udp_header), buffer, len);
 
@@ -132,35 +132,35 @@ namespace NetStack {
 
     optional<size_t> UDPSocket::receiveFrom(void* buffer, size_t len, int flags,
                                             sockaddr* src_addr) {
-        _lock.acquire();
+        m_lock.acquire();
 
         // Make nonblocking flag pls
-        while (!_first_datagram) {
-            _event.wait();
-            _lock.release();
+        while (!m_first_datagram) {
+            m_event.wait();
+            m_lock.release();
 
             Proc::Thread::yield();
 
-            _lock.acquire();
+            m_lock.acquire();
         }
 
-        auto dgram = _first_datagram;
+        auto dgram = m_first_datagram;
 
-        _first_datagram = _first_datagram->next;
-        if (!_first_datagram)
-            _last_datagram = nullptr;
+        m_first_datagram = m_first_datagram->next;
+        if (!m_first_datagram)
+            m_last_datagram = nullptr;
 
-        _lock.release();
+        m_lock.release();
 
         size_t dgram_len = dgram->len;
         memcpy(buffer, dgram->buffer, min<size_t>(dgram->len, len));
 
         if (src_addr) {
-            auto _src_addr = (sockaddr_inet*) src_addr;
+            auto m_src_addr = (sockaddr_inet*) src_addr;
 
-            _src_addr->domain = socket_domain_t::AF_INET;
-            _src_addr->addr   = dgram->source_address;
-            _src_addr->port   = dgram->source_port;
+            m_src_addr->domain = socket_domain_t::AF_INET;
+            m_src_addr->addr   = dgram->source_address;
+            m_src_addr->port   = dgram->source_port;
         }
 
         Heap::free(dgram);
@@ -170,7 +170,7 @@ namespace NetStack {
 
     void UDPSocket::packetReceived(Net::ipv4_addr src, uint16_t src_port, const uint8_t* buffer,
                                    uint16_t len) {
-        if (_buffered_size + len > UDP_SOCKET_BUFFER_SIZE) {
+        if (m_buffered_size + len > UDP_SOCKET_BUFFER_SIZE) {
             printk("udp: Socket at port %i buffer overflow\n", source_port);
             return;
         }
@@ -183,16 +183,16 @@ namespace NetStack {
 
         memcpy(dgram->buffer, buffer, len);
 
-        _lock.acquire();
+        m_lock.acquire();
 
-        if (_last_datagram)
-            _last_datagram->next = dgram;
+        if (m_last_datagram)
+            m_last_datagram->next = dgram;
         else
-            _first_datagram = dgram;
+            m_first_datagram = dgram;
 
-        _last_datagram = dgram;
+        m_last_datagram = dgram;
 
-        _event.raise();
-        _lock.release();
+        m_event.raise();
+        m_lock.release();
     }
 }

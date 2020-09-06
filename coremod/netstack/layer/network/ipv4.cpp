@@ -8,17 +8,17 @@
 #include "layer/transport/udp.hpp"
 
 namespace NetStack {
-    AEX::Mem::Vector<IPv4Layer::retx_frame, 16, 16> IPv4Layer::_retx_queue;
-    AEX::Spinlock                                   IPv4Layer::_retx_queue_lock;
-    uint32_t                                        IPv4Layer::_retx_queue_size;
+    AEX::Mem::Vector<IPv4Layer::retx_frame, 16, 16> IPv4Layer::m_retx_queue;
+    AEX::Spinlock                                   IPv4Layer::m_retx_queue_lock;
+    uint32_t                                        IPv4Layer::m_retx_queue_size;
 
-    AEX::Proc::Thread_SP IPv4Layer::_loop_thread;
+    AEX::Proc::Thread_SP IPv4Layer::m_loop_thread;
 
     void IPv4Layer::init() {
-        auto thread  = new AEX::Proc::Thread(nullptr, (void*) loop,
+        auto thread   = new AEX::Proc::Thread(nullptr, (void*) loop,
                                             AEX::Proc::Thread::KERNEL_STACK_SIZE, nullptr);
-        _loop_thread = thread->getSmartPointer();
-        _loop_thread->start();
+        m_loop_thread = thread->getSmartPointer();
+        m_loop_thread->start();
     }
 
     int IPv4Layer::encaps_len(int payload_len) {
@@ -127,8 +127,8 @@ namespace NetStack {
     }
 
     bool IPv4Layer::retx() {
-        for (int i = 0; i < _retx_queue.count(); i++) {
-            auto& frame = _retx_queue[i];
+        for (int i = 0; i < m_retx_queue.count(); i++) {
+            auto& frame = m_retx_queue[i];
             frame.tries++;
 
             AEX::printk("retransmitting...\n");
@@ -137,21 +137,21 @@ namespace NetStack {
             if (err == AEX::ENONE || frame.tries == MAX_RETX_TRIES) {
                 delete[] frame.data;
 
-                _retx_queue_lock.acquire();
-                _retx_queue_size -= sizeof(retx_frame) + AEX::Mem::Heap::msize_total(frame.len);
-                _retx_queue.erase(i);
-                _retx_queue_lock.release();
+                m_retx_queue_lock.acquire();
+                m_retx_queue_size -= sizeof(retx_frame) + AEX::Mem::Heap::msize_total(frame.len);
+                m_retx_queue.erase(i);
+                m_retx_queue_lock.release();
 
                 i--;
                 continue;
             }
         }
 
-        return _retx_queue.count() == 0;
+        return m_retx_queue.count() == 0;
     }
 
     void IPv4Layer::retx_add(const uint8_t* buffer, uint16_t len) {
-        if (_retx_queue_size + sizeof(retx_frame) + AEX::Mem::Heap::msize_total(len) >
+        if (m_retx_queue_size + sizeof(retx_frame) + AEX::Mem::Heap::msize_total(len) >
             MAX_RETX_QUEUE_SIZE)
             return;
 
@@ -164,10 +164,10 @@ namespace NetStack {
 
         AEX::memcpy(frame.data, buffer, len);
 
-        _retx_queue_lock.acquire();
-        _retx_queue_size += sizeof(retx_frame) + AEX::Mem::Heap::msize_total(len);
-        _retx_queue.pushBack(frame);
-        _retx_queue_lock.release();
+        m_retx_queue_lock.acquire();
+        m_retx_queue_size += sizeof(retx_frame) + AEX::Mem::Heap::msize_total(len);
+        m_retx_queue.pushBack(frame);
+        m_retx_queue_lock.release();
     }
 
     AEX::error_t IPv4Layer::send(const uint8_t* buffer, uint16_t len) {

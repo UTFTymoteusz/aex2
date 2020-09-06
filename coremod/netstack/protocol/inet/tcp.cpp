@@ -20,19 +20,19 @@ namespace NetStack {
     RWSpinlock                      TCPProtocol::sockets_lock;
     Mem::Vector<TCPSocket*, 32, 32> TCPProtocol::sockets;
 
-    Spinlock  TCPProtocol::_ports_lock;
-    uint32_t* TCPProtocol::_port_bitmap       = nullptr;
-    uint16_t  TCPProtocol::_port_dynamic_last = 49151;
+    Spinlock  TCPProtocol::m_ports_lock;
+    uint32_t* TCPProtocol::m_port_bitmap       = nullptr;
+    uint16_t  TCPProtocol::m_port_dynamic_last = 49151;
 
-    Mem::SmartPointer<Proc::Thread> TCPProtocol::_loop_thread;
+    Mem::SmartPointer<Proc::Thread> TCPProtocol::m_loop_thread;
 
     void TCPProtocol::init() {
-        _port_bitmap = new uint32_t[65536 / sizeof(uint32_t) / 8];
+        m_port_bitmap = new uint32_t[65536 / sizeof(uint32_t) / 8];
 
         auto thread = new Proc::Thread(nullptr, (void*) loop, 16384, nullptr);
 
-        _loop_thread = thread->getSmartPointer();
-        _loop_thread->start();
+        m_loop_thread = thread->getSmartPointer();
+        m_loop_thread->start();
     }
 
     void TCPProtocol::loop() {
@@ -83,7 +83,7 @@ namespace NetStack {
         for (int i = 0; i < sockets.count(); i++) {
             auto socket = sockets[i];
             if (dst_port != socket->source_port || src_port != socket->destination_port ||
-                socket->_block.state == TCP_LISTEN || socket->_block.state == TCP_CLOSED)
+                socket->m_block.state == TCP_LISTEN || socket->m_block.state == TCP_CLOSED)
                 continue;
 
             socket->packetReceived(src, src_port, buffer, len);
@@ -94,7 +94,7 @@ namespace NetStack {
 
         for (int i = 0; i < sockets.count(); i++) {
             auto socket = sockets[i];
-            if (dst_port != socket->source_port || socket->_block.state != TCP_LISTEN)
+            if (dst_port != socket->source_port || socket->m_block.state != TCP_LISTEN)
                 continue;
 
             socket->packetReceived(src, src_port, buffer, len);
@@ -109,30 +109,30 @@ namespace NetStack {
     }
 
     uint16_t TCPProtocol::allocateDynamicPort() {
-        _ports_lock.acquire();
+        m_ports_lock.acquire();
 
-        _port_dynamic_last++;
-        if (_port_dynamic_last == 0)
-            _port_dynamic_last = 49152;
+        m_port_dynamic_last++;
+        if (m_port_dynamic_last == 0)
+            m_port_dynamic_last = 49152;
 
-        uint32_t ii = _port_dynamic_last / (sizeof(uint32_t) * 8);
-        uint16_t ib = _port_dynamic_last % (sizeof(uint32_t) * 8);
+        uint32_t ii = m_port_dynamic_last / (sizeof(uint32_t) * 8);
+        uint16_t ib = m_port_dynamic_last % (sizeof(uint32_t) * 8);
 
         uint32_t buffer;
 
         for (int i = 49152; i <= 65536; i++) {
-            buffer = _port_bitmap[ii];
+            buffer = m_port_bitmap[ii];
 
             for (; ib < sizeof(uint32_t) * 8; ib++) {
                 if (buffer & (1 << ib))
                     continue;
 
-                _port_bitmap[ii] |= 1 << ib;
+                m_port_bitmap[ii] |= 1 << ib;
 
-                uint16_t port      = ii * 32 + ib;
-                _port_dynamic_last = port;
+                uint16_t port       = ii * 32 + ib;
+                m_port_dynamic_last = port;
 
-                _ports_lock.release();
+                m_ports_lock.release();
 
                 return port;
             }
@@ -144,7 +144,7 @@ namespace NetStack {
                 ii = 49152 / sizeof(uint32_t);
         }
 
-        _ports_lock.release();
+        m_ports_lock.release();
 
         return 0;
     }
@@ -153,12 +153,12 @@ namespace NetStack {
         uint32_t ii = port / (sizeof(uint32_t) * 8);
         uint16_t ib = port % (sizeof(uint32_t) * 8);
 
-        auto scopeLock = ScopeSpinlock(_ports_lock);
+        ScopeSpinlock scopeLock(m_ports_lock);
 
-        if (_port_bitmap[ii] & (1 << ib))
+        if (m_port_bitmap[ii] & (1 << ib))
             return false;
 
-        _port_bitmap[ii] |= 1 << ib;
+        m_port_bitmap[ii] |= 1 << ib;
         return true;
     }
 
@@ -166,9 +166,9 @@ namespace NetStack {
         uint32_t ii = port / (sizeof(uint32_t) * 8);
         uint16_t ib = port % (sizeof(uint32_t) * 8);
 
-        auto scopeLock = ScopeSpinlock(_ports_lock);
+        ScopeSpinlock scopeLock(m_ports_lock);
 
-        _port_bitmap[ii] &= ~(1 << ib);
+        m_port_bitmap[ii] &= ~(1 << ib);
     }
 
     void TCPProtocol::pushSocket(TCPSocket* socket) {

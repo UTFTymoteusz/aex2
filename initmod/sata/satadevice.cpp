@@ -112,10 +112,10 @@ namespace AEX::Dev::SATA {
     int SATADevice::findSlot() {
         while (true)
             for (int i = 0; i < max_commands; i++) {
-                auto scopeLock = ScopeSpinlock(_lock);
+                ScopeSpinlock scopeLock(m_lock);
 
-                if (!(_command_slots & (1 << i))) {
-                    _command_slots |= (1 << i);
+                if (!(m_command_slots & (1 << i))) {
+                    m_command_slots |= (1 << i);
 
                     return i;
                 }
@@ -123,9 +123,9 @@ namespace AEX::Dev::SATA {
     }
 
     void SATADevice::releaseSlot(int slot) {
-        auto scopeLock = ScopeSpinlock(_lock);
+        ScopeSpinlock scopeLock(m_lock);
 
-        _command_slots &= ~(1 << slot);
+        m_command_slots &= ~(1 << slot);
     }
 
     void SATADevice::fillPRDTs(volatile AHCI::hba_command_table* table, void* dst, size_t len) {

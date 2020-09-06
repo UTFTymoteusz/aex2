@@ -34,11 +34,11 @@ namespace NetStack {
         static void     freePort(uint16_t port);
 
         private:
-        static AEX::Spinlock _ports_lock;
-        static uint32_t*     _port_bitmap;
-        static uint16_t      _port_dynamic_last;
+        static AEX::Spinlock m_ports_lock;
+        static uint32_t*     m_port_bitmap;
+        static uint16_t      m_port_dynamic_last;
 
-        static AEX::Mem::SmartPointer<AEX::Proc::Thread> _loop_thread;
+        static AEX::Mem::SmartPointer<AEX::Proc::Thread> m_loop_thread;
 
         static void pushSocket(TCPSocket* socket);
 

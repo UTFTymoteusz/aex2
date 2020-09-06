@@ -8,13 +8,13 @@ namespace AEX::Dev::SATA {
         public:
         SDDriver() : Driver("sd") {}
 
-        bool check(Tree::Device* _device) {
-            auto device = (SATADevice*) _device;
+        bool check(Tree::Device* m_device) {
+            auto device = (SATADevice*) m_device;
             return device->type == SATA_ATA;
         }
 
         void bind(Tree::Device*) {
-            // auto device = (SATADevice*) _device;
+            // auto device = (SATADevice*) m_device;
         }
     };
 

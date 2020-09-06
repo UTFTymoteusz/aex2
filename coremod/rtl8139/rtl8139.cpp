@@ -80,8 +80,8 @@ auto constexpr BUFFER_MASK = (BUFFER_SIZE - 0x10) - 4;
 class RTL8139 : public Dev::NetDevice {
     public:
     RTL8139(PCI::PCIDevice* device, const char* name) : NetDevice(name, Net::LINK_ETHERNET) {
-        _tx_buffers = (uint8_t*) Mem::kernel_pagemap->allocContinuous(2048 * 4);
-        _rx_buffer  = (uint8_t*) Mem::kernel_pagemap->allocContinuous(BUFFER_SIZE + 1500);
+        m_tx_buffers = (uint8_t*) Mem::kernel_pagemap->allocContinuous(2048 * 4);
+        m_rx_buffer  = (uint8_t*) Mem::kernel_pagemap->allocContinuous(BUFFER_SIZE + 1500);
 
         for (int i = 5; i >= 0; i--) {
             auto resource = device->getResource(i);
@@ -89,58 +89,58 @@ class RTL8139 : public Dev::NetDevice {
                 continue;
 
             if (resource.value.type == Tree::Device::resource::type_t::IO)
-                _io_base = resource.value.start;
+                m_io_base = resource.value.start;
         }
 
         Net::mac_addr mac;
 
         for (int i = 0; i < 6; i++)
-            mac[i] = CPU::inportb(_io_base + i);
+            mac[i] = CPU::inportb(m_io_base + i);
 
-        _irq = device->getIRQ();
+        m_irq = device->getIRQ();
 
-        printk("rtl8139: %s: irq %i\n", name, _irq);
+        printk("rtl8139: %s: irq %i\n", name, m_irq);
         printk("rtl8139: %s: mac %02X:%02X:%02X:%02X:%02X:%02X\n", name, mac[0], mac[1], mac[2],
                mac[3], mac[4], mac[5]);
 
         info.ipv4.mac = mac;
 
         // Power on
-        CPU::outportb(_io_base + CONFIG_1, 0x00);
+        CPU::outportb(m_io_base + CONFIG_1, 0x00);
 
         // Software reset
-        CPU::outportb(_io_base + CMD, CMD_RST);
+        CPU::outportb(m_io_base + CMD, CMD_RST);
 
-        while (CPU::inportb(_io_base + CMD) & CMD_RST)
+        while (CPU::inportb(m_io_base + CMD) & CMD_RST)
             Proc::Thread::yield();
 
-        uint32_t tx_paddr = Mem::kernel_pagemap->paddrof(_tx_buffers);
+        uint32_t tx_paddr = Mem::kernel_pagemap->paddrof(m_tx_buffers);
         if (tx_paddr > 0xFFFFFFFF)
             kpanic("rtl8139: TX buffer address > 4gb");
 
-        uint32_t rx_paddr = Mem::kernel_pagemap->paddrof(_rx_buffer);
+        uint32_t rx_paddr = Mem::kernel_pagemap->paddrof(m_rx_buffer);
         if (rx_paddr > 0xFFFFFFFF)
             kpanic("rtl8139: RX buffer address > 4gb");
 
         // Set transmit buffers addresses
         for (int i = 0; i < 4; i++)
-            CPU::outportd(_io_base + TSAD0 + 4 * i, tx_paddr + 2048 * i);
+            CPU::outportd(m_io_base + TSAD0 + 4 * i, tx_paddr + 2048 * i);
 
         // Set receive buffer address
-        CPU::outportd(_io_base + RB_START, rx_paddr);
+        CPU::outportd(m_io_base + RB_START, rx_paddr);
 
         // Enable transmitting and receiving
-        CPU::outportb(_io_base + CMD, CMD_TE | CMD_RE);
+        CPU::outportb(m_io_base + CMD, CMD_TE | CMD_RE);
 
         // Let's set the params
-        CPU::outportd(_io_base + TCR, TSD_CRC | TSD_MXDMA_1024);
-        CPU::outportd(_io_base + RCR, RCR_B32K | RCR_WRAP | RCR_AAP | RCR_AB | RCR_AM | RCR_AR);
+        CPU::outportd(m_io_base + TCR, TSD_CRC | TSD_MXDMA_1024);
+        CPU::outportd(m_io_base + RCR, RCR_B32K | RCR_WRAP | RCR_AAP | RCR_AB | RCR_AM | RCR_AR);
 
         Sys::IRQ::register_handler(
-            _irq, [](void* dev) { ((RTL8139*) dev)->handleIRQ(); }, this);
+            m_irq, [](void* dev) { ((RTL8139*) dev)->handleIRQ(); }, this);
 
         // IMR time
-        CPU::outportw(_io_base + IMR, IMR_ROK | IMR_ROV | IMR_FOV);
+        CPU::outportw(m_io_base + IMR, IMR_ROK | IMR_ROV | IMR_FOV);
 
         printk(PRINTK_OK "rtl8139: %s: Ready\n", name);
     }
@@ -149,17 +149,17 @@ class RTL8139 : public Dev::NetDevice {
         if (len < 16)
             return EINVAL; // change this later pls
 
-        auto scopeLock = ScopeSpinlock(_tx_lock);
+        ScopeSpinlock scopeLock(m_tx_lock);
 
         len = min<size_t>(len, 1792);
 
-        uint16_t io_port = _io_base + TSD0 + 4 * _tx_buffer_current;
+        uint16_t io_port = m_io_base + TSD0 + 4 * m_tx_buffer_current;
         while (!(CPU::inportd(io_port) & TSD_OWN)) {
-            _tx_lock.release();
-            _tx_lock.acquire();
+            m_tx_lock.release();
+            m_tx_lock.acquire();
         }
 
-        uint8_t* tx_buffer = _tx_buffers + 2048 * _tx_buffer_current;
+        uint8_t* tx_buffer = m_tx_buffers + 2048 * m_tx_buffer_current;
 
         switch (type) {
         case Net::NET_ARP: {
@@ -208,9 +208,9 @@ class RTL8139 : public Dev::NetDevice {
 
         CPU::outportd(io_port, len);
 
-        _tx_buffer_current++;
-        if (_tx_buffer_current == 4)
-            _tx_buffer_current = 0;
+        m_tx_buffer_current++;
+        if (m_tx_buffer_current == 4)
+            m_tx_buffer_current = 0;
 
         return ENONE;
     }
@@ -247,23 +247,23 @@ class RTL8139 : public Dev::NetDevice {
         uint16_t len;
     } __attribute((packed));
 
-    uint32_t _io_base;
+    uint32_t m_io_base;
 
-    uint8_t* _tx_buffers        = nullptr;
-    uint8_t  _tx_buffer_current = 0;
-    uint8_t* _rx_buffer         = nullptr;
-    size_t   _rx_buffer_pos     = 0;
+    uint8_t* m_tx_buffers        = nullptr;
+    uint8_t  m_tx_buffer_current = 0;
+    uint8_t* m_rx_buffer         = nullptr;
+    size_t   m_rx_buffer_pos     = 0;
 
-    uint8_t _irq;
+    uint8_t m_irq;
 
-    Spinlock _tx_lock;
+    Spinlock m_tx_lock;
 
     void handleIRQ() {
         static Spinlock lock;
 
         lock.acquire();
 
-        uint16_t status = CPU::inportw(_io_base + ISR);
+        uint16_t status = CPU::inportw(m_io_base + ISR);
         uint16_t ack    = 0;
 
         if (status & ISR_ROK) {
@@ -282,24 +282,24 @@ class RTL8139 : public Dev::NetDevice {
             kpanic("rtl8139: RX buffer overflow\n");
         }
 
-        CPU::outportw(_io_base + ISR, ack);
+        CPU::outportw(m_io_base + ISR, ack);
 
         lock.release();
     }
 
     void packetReceived() {
-        while (_rx_buffer_pos != CPU::inportw(_io_base + CBR)) {
-            auto frame = (rx_frame*) (&_rx_buffer[_rx_buffer_pos]);
+        while (m_rx_buffer_pos != CPU::inportw(m_io_base + CBR)) {
+            auto frame = (rx_frame*) (&m_rx_buffer[m_rx_buffer_pos]);
             if (!(frame->flags & 0x01))
                 break;
 
             uint16_t frame_len = frame->len;
 
-            receive(&_rx_buffer[_rx_buffer_pos + 4], frame_len);
+            receive(&m_rx_buffer[m_rx_buffer_pos + 4], frame_len);
 
-            _rx_buffer_pos = (_rx_buffer_pos + (frame_len + 4 + 3)) & BUFFER_MASK;
+            m_rx_buffer_pos = (m_rx_buffer_pos + (frame_len + 4 + 3)) & BUFFER_MASK;
 
-            CPU::outportw(_io_base + CAPR, _rx_buffer_pos - 0x10);
+            CPU::outportw(m_io_base + CAPR, m_rx_buffer_pos - 0x10);
         }
     }
 };

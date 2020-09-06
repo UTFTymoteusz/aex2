@@ -24,6 +24,8 @@ all:
 	cd initmod && $(MAKE) all INITMOD_DIR="$(INITMOD_DIR)"
 	cd kernel  && $(MAKE) all
 
+	# cd libc && $(MAKE) all
+	
 	cd kernel && $(MAKE) copy SYSTEM_DIR="$(SYSTEM_DIR)"
 
 iso:

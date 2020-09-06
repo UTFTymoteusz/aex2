@@ -17,12 +17,12 @@ namespace NetStack {
     Spinlock                        UDPProtocol::sockets_lock;
     Mem::Vector<UDPSocket*, 32, 32> UDPProtocol::sockets;
 
-    Spinlock  UDPProtocol::_ports_lock;
-    uint32_t* UDPProtocol::_port_bitmap       = nullptr;
-    uint16_t  UDPProtocol::_port_dynamic_last = 49151;
+    Spinlock  UDPProtocol::m_ports_lock;
+    uint32_t* UDPProtocol::m_port_bitmap       = nullptr;
+    uint16_t  UDPProtocol::m_port_dynamic_last = 49151;
 
     void UDPProtocol::init() {
-        _port_bitmap = new uint32_t[65536 / sizeof(uint32_t) / 8];
+        m_port_bitmap = new uint32_t[65536 / sizeof(uint32_t) / 8];
     }
 
     optional<Socket_SP> UDPProtocol::createSocket(socket_type_t type) {
@@ -76,30 +76,30 @@ namespace NetStack {
 
 
     uint16_t UDPProtocol::allocateDynamicPort() {
-        _ports_lock.acquire();
+        m_ports_lock.acquire();
 
-        _port_dynamic_last++;
-        if (_port_dynamic_last == 0)
-            _port_dynamic_last = 49152;
+        m_port_dynamic_last++;
+        if (m_port_dynamic_last == 0)
+            m_port_dynamic_last = 49152;
 
-        uint32_t ii = _port_dynamic_last / (sizeof(uint32_t) * 8);
-        uint16_t ib = _port_dynamic_last % (sizeof(uint32_t) * 8);
+        uint32_t ii = m_port_dynamic_last / (sizeof(uint32_t) * 8);
+        uint16_t ib = m_port_dynamic_last % (sizeof(uint32_t) * 8);
 
         uint32_t buffer;
 
         for (int i = 49152; i <= 65536; i++) {
-            buffer = _port_bitmap[ii];
+            buffer = m_port_bitmap[ii];
 
             for (; ib < sizeof(uint32_t) * 8; ib++) {
                 if (buffer & (1 << ib))
                     continue;
 
-                _port_bitmap[ii] |= 1 << ib;
+                m_port_bitmap[ii] |= 1 << ib;
 
-                uint16_t port      = ii * 32 + ib;
-                _port_dynamic_last = port;
+                uint16_t port       = ii * 32 + ib;
+                m_port_dynamic_last = port;
 
-                _ports_lock.release();
+                m_ports_lock.release();
 
                 return port;
             }
@@ -111,7 +111,7 @@ namespace NetStack {
                 ii = 49152 / sizeof(uint32_t);
         }
 
-        _ports_lock.release();
+        m_ports_lock.release();
 
         return 0;
     }
@@ -120,12 +120,12 @@ namespace NetStack {
         uint32_t ii = port / (sizeof(uint32_t) * 8);
         uint16_t ib = port % (sizeof(uint32_t) * 8);
 
-        auto scopeLock = ScopeSpinlock(_ports_lock);
+        ScopeSpinlock scopeLock(m_ports_lock);
 
-        if (_port_bitmap[ii] & (1 << ib))
+        if (m_port_bitmap[ii] & (1 << ib))
             return false;
 
-        _port_bitmap[ii] |= 1 << ib;
+        m_port_bitmap[ii] |= 1 << ib;
         return true;
     }
 
@@ -133,8 +133,8 @@ namespace NetStack {
         uint32_t ii = port / (sizeof(uint32_t) * 8);
         uint16_t ib = port % (sizeof(uint32_t) * 8);
 
-        auto scopeLock = ScopeSpinlock(_ports_lock);
+        ScopeSpinlock scopeLock(m_ports_lock);
 
-        _port_bitmap[ii] &= ~(1 << ib);
+        m_port_bitmap[ii] &= ~(1 << ib);
     }
 }

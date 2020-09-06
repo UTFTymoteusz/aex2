@@ -1,5 +1,7 @@
 #pragma once
 
+#include "aex/macros.hpp"
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -63,7 +65,7 @@ namespace AEX::Dev::SATA {
             vuint32_t fis_control;
             vuint32_t reserved1[11];
             vuint32_t vendor_specific[4];
-        } __attribute__((packed));
+        } PACKED;
 
         struct hba_t {
             vuint32_t host_capability;
@@ -84,7 +86,7 @@ namespace AEX::Dev::SATA {
             uint8_t vendor_specific[0x100 - 0xA0];
 
             hba_port_t ports[];
-        } __attribute__((packed));
+        } PACKED;
 
         struct hba_command_header {
             uint8_t fis_length : 5;
@@ -106,7 +108,7 @@ namespace AEX::Dev::SATA {
             uint64_t command_table_addr;
 
             uint32_t reserved1[4];
-        } __attribute__((packed));
+        } PACKED;
 
         struct phys_region_table_entry {
             uint64_t data_address;
@@ -115,7 +117,7 @@ namespace AEX::Dev::SATA {
             uint32_t bytes : 22;
             uint32_t reserved1 : 9;
             uint32_t interrupt_on_completion : 1;
-        } __attribute__((packed));
+        } PACKED;
 
         struct fis_reg_h2d {
             uint8_t fis_type;
@@ -142,7 +144,7 @@ namespace AEX::Dev::SATA {
             uint8_t  control;
 
             uint8_t reserved1[4];
-        } __attribute__((packed));
+        } PACKED;
 
         struct fis_reg_d2h {
             uint8_t fis_type;
@@ -169,7 +171,7 @@ namespace AEX::Dev::SATA {
             uint8_t  reserved3[2];
 
             uint8_t reserved4[4];
-        } __attribute__((packed));
+        } PACKED;
 
         struct fis_data {
             uint8_t fis_type;
@@ -180,7 +182,7 @@ namespace AEX::Dev::SATA {
             uint8_t reserved1[2];
 
             uint8_t data[];
-        } __attribute__((packed));
+        } PACKED;
 
         struct fis_pio_setup {
             uint8_t fis_type;
@@ -210,7 +212,7 @@ namespace AEX::Dev::SATA {
 
             uint16_t transfer_count;
             uint8_t  reserved4[2];
-        } __attribute__((packed));
+        } PACKED;
 
         struct fis_dma_setup {
             uint8_t fis_type;
@@ -230,7 +232,7 @@ namespace AEX::Dev::SATA {
             uint32_t dma_buffer_offset;
             uint32_t transfer_count;
             uint32_t reserved3;
-        } __attribute__((packed));
+        } PACKED;
 
         struct hba_command_table {
             union {
@@ -242,7 +244,7 @@ namespace AEX::Dev::SATA {
             uint8_t reserved[48];
 
             phys_region_table_entry entries[];
-        } __attribute__((packed));
+        } PACKED;
 
         struct hba_fis {
             fis_dma_setup dma_setup;
@@ -259,7 +261,7 @@ namespace AEX::Dev::SATA {
             uint8_t idk[64];
 
             uint8_t reserved[0x100 - 0xA0];
-        } __attribute__((packed));
+        } PACKED;
 
         AHCI(Tree::Device* device, void* addr, int index);
 
@@ -272,7 +274,7 @@ namespace AEX::Dev::SATA {
         static constexpr auto SATA_SIG_SEMB  = 0xC33C0101;
         static constexpr auto SATA_SIG_PM    = 0x96690101;
 
-        Tree::Device* _device;
+        Tree::Device* m_device;
 
         hba_t* hba;
         int    index;
