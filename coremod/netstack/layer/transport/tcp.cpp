@@ -27,7 +27,7 @@ namespace NetStack {
         fake_header.protocol    = 6;
         fake_header.length      = len;
 
-        uint16_t hdr_len = (uint16_t) header->fucking_bitvalues >> 10;
+        uint16_t hdr_len = (uint16_t) header->goddamned_bitvalues >> 10;
         if (hdr_len > len)
             return;
 

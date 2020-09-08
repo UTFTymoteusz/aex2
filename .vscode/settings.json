@@ -12,7 +12,13 @@
         "exception": "cpp",
         "cstdarg": "cpp",
         "cstdint": "cpp",
-        "array": "cpp"
+        "array": "cpp",
+        "*.tcc": "cpp",
+        "unordered_map": "cpp",
+        "fstream": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "sstream": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "clang-tidy.compilerArgs": [

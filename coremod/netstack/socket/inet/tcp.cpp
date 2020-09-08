@@ -575,14 +575,14 @@ namespace NetStack {
 
         auto m_tcp_header = (tcp_header*) payload;
 
-        m_tcp_header->seq_number        = seg->seq;
-        m_tcp_header->ack_number        = seg->ack;
-        m_tcp_header->source_port       = this->source_port;
-        m_tcp_header->destination_port  = port;
-        m_tcp_header->checksum          = 0x0000;
-        m_tcp_header->urgent_pointer    = 0;
-        m_tcp_header->fucking_bitvalues = ((seg->header_len / 4) << 12) | seg->flags;
-        m_tcp_header->window            = getWindow();
+        m_tcp_header->seq_number          = seg->seq;
+        m_tcp_header->ack_number          = seg->ack;
+        m_tcp_header->source_port         = this->source_port;
+        m_tcp_header->destination_port    = port;
+        m_tcp_header->checksum            = 0x0000;
+        m_tcp_header->urgent_pointer      = 0;
+        m_tcp_header->goddamned_bitvalues = ((seg->header_len / 4) << 12) | seg->flags;
+        m_tcp_header->window              = getWindow();
 
         auto m_fake_header = tcp_fake_ipv4_header();
 
@@ -627,8 +627,8 @@ namespace NetStack {
 
         auto m_tcp_header = (tcp_header*) buffer;
 
-        uint16_t    hdr_len = ((((uint16_t) m_tcp_header->fucking_bitvalues) >> 12) * 4);
-        tcp_flags_t flags   = (tcp_flags_t)((uint16_t) m_tcp_header->fucking_bitvalues);
+        uint16_t    hdr_len = ((((uint16_t) m_tcp_header->goddamned_bitvalues) >> 12) * 4);
+        tcp_flags_t flags   = (tcp_flags_t)((uint16_t) m_tcp_header->goddamned_bitvalues);
 
         uint32_t seqn = (uint32_t) m_tcp_header->seq_number;
         uint32_t ackn = (uint32_t) m_tcp_header->ack_number;
@@ -788,8 +788,8 @@ namespace NetStack {
                                          const uint8_t* buffer, uint16_t len) {
         auto m_tcp_header = (tcp_header*) buffer;
 
-        uint16_t    hdr_len = ((((uint16_t) m_tcp_header->fucking_bitvalues) >> 12) * 4);
-        tcp_flags_t flags   = (tcp_flags_t)((uint16_t) m_tcp_header->fucking_bitvalues);
+        uint16_t    hdr_len = ((((uint16_t) m_tcp_header->goddamned_bitvalues) >> 12) * 4);
+        tcp_flags_t flags   = (tcp_flags_t)((uint16_t) m_tcp_header->goddamned_bitvalues);
 
         uint32_t seqn = (uint32_t) m_tcp_header->seq_number;
         uint32_t ackn = (uint32_t) m_tcp_header->ack_number;

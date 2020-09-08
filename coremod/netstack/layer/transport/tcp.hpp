@@ -12,7 +12,7 @@ namespace NetStack {
         AEX::big_endian<uint32_t> seq_number;
         AEX::big_endian<uint32_t> ack_number;
 
-        AEX::big_endian<uint16_t> fucking_bitvalues;
+        AEX::big_endian<uint16_t> goddamned_bitvalues;
         AEX::big_endian<uint16_t> window;
 
         AEX::big_endian<uint16_t> checksum;

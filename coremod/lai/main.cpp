@@ -33,7 +33,7 @@ void module_enter() {
 
     lai_enable_acpi(1);
 
-    register_global_symbol("acpi_set_pci_pin", (void*) acpi_set_pci_pin);
+    register_dynamic_symbol("acpi_set_pci_pin", (void*) acpi_set_pci_pin);
 }
 
 void module_exit() {}

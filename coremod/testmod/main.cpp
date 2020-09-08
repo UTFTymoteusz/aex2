@@ -2,7 +2,6 @@
 #include "aex/mem.hpp"
 #include "aex/printk.hpp"
 #include "aex/proc.hpp"
-#include "aex/tty.hpp"
 
 using namespace AEX;
 
