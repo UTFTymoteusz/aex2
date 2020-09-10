@@ -33,16 +33,14 @@ namespace AEX::FS {
         if (!info.value.is_block())
             return ENOTBLK;
 
-        auto block_try = Dev::open_block_handle(info.value.dev_id);
-        if (!block_try)
+        auto handle_try = Dev::open_block_handle(info.value.dev_id);
+        if (!handle_try)
             return ENOENT;
 
-        auto handle = block_try.value;
-        printk("handle: 0x%p\n", &handle);
+        auto handle = handle_try.value;
 
         iso9660_dentry root_dentry;
-
-        uint8_t buffer[BLOCK_SIZE];
+        uint8_t        buffer[BLOCK_SIZE];
 
         for (int i = 0; i <= 64; i++) {
             if (i == 64) {
@@ -57,10 +55,10 @@ namespace AEX::FS {
                 return EINVAL;
 
             switch (header->type) {
-            case ios9960_vd_type::TERMINATOR:
+            case TERMINATOR:
                 i = 666; // a quick and dirty way to break out of this for loop in a switch
                 break;
-            case ios9960_vd_type::PRIMARY_VOLUME_DESCRIPTOR: {
+            case PRIMARY_VOLUME_DESCRIPTOR: {
                 auto pvd = (iso9660_primary_volume_descriptor*) buffer;
 
                 root_dentry = *((iso9660_dentry*) pvd->root_dentry_bytes);
