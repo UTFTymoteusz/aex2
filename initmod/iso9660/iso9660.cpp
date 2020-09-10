@@ -33,9 +33,12 @@ namespace AEX::FS {
         if (!info.value.is_block())
             return ENOTBLK;
 
-        auto block = (Dev::BlockDevice_SP) Dev::devices.get(info.value.dev_id);
-        if (!block)
+        auto block_try = Dev::open_block_handle(info.value.dev_id);
+        if (!block_try)
             return ENOENT;
+
+        auto handle = block_try.value;
+        printk("handle: 0x%p\n", &handle);
 
         iso9660_dentry root_dentry;
 
@@ -47,7 +50,7 @@ namespace AEX::FS {
                 return EINVAL;
             }
 
-            block->read(buffer, ISO_START + BLOCK_SIZE * i, BLOCK_SIZE);
+            handle.read(buffer, ISO_START + BLOCK_SIZE * i, BLOCK_SIZE);
 
             auto header = (iso9660_vd_header*) buffer;
             if (memcmp(header->identifier, IDENTIFIER, 5) != 0)
@@ -67,6 +70,6 @@ namespace AEX::FS {
             }
         }
 
-        return new ISO9660ControlBlock(block, root_dentry);
+        return new ISO9660ControlBlock(handle, root_dentry);
     }
 }

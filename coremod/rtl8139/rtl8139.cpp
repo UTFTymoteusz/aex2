@@ -89,7 +89,7 @@ class RTL8139 : public Dev::NetDevice {
             if (!resource)
                 continue;
 
-            if (resource.value.type == Tree::Device::resource::IO)
+            if (resource.value.type == Tree::resource::IO)
                 m_io_base = resource.value.start;
         }
 

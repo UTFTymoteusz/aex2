@@ -19,8 +19,8 @@ namespace AEX::FS {
         iso9660_dentry iso_dentry = {};
 
         // We can get away with doing it like this because we're read only
-        dir->control_block->block_dev->read(
-            &iso_dentry, m_dir->m_dentry.data_lba.le * BLOCK_SIZE + dentry.pos, sizeof(iso_dentry));
+        this->block_handle.read(&iso_dentry, m_dir->m_dentry.data_lba.le * BLOCK_SIZE + dentry.pos,
+                                sizeof(iso_dentry));
 
         if (dentry.is_directory())
             return INode_SP(new ISO9600DirectoryINode(iso_dentry));
