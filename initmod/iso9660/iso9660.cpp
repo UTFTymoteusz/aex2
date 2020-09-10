@@ -13,8 +13,10 @@
 constexpr auto ISO_START = BLOCK_SIZE * 0x10;
 
 namespace AEX::FS {
+    ISO9660* iso9660_fs;
+
     void ISO9660::init() {
-        new ISO9660();
+        iso9660_fs = new ISO9660();
     }
 
     ISO9660::ISO9660() : Filesystem("iso9660") {}
