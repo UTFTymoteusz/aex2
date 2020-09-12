@@ -136,8 +136,7 @@ class RTL8139 : public Dev::NetDevice {
         CPU::outportd(m_io_base + TCR, TSD_CRC | TSD_MXDMA_1024);
         CPU::outportd(m_io_base + RCR, RCR_B32K | RCR_WRAP | RCR_AAP | RCR_AB | RCR_AM | RCR_AR);
 
-        Sys::IRQ::register_handler(
-            m_irq, [](void* dev) { ((RTL8139*) dev)->handleIRQ(); }, this);
+        Sys::IRQ::register_handler(m_irq, [](void* dev) { ((RTL8139*) dev)->handleIRQ(); }, this);
 
         // IMR time
         CPU::outportw(m_io_base + IMR, IMR_ROK | IMR_ROV | IMR_FOV);
