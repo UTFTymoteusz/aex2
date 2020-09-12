@@ -104,7 +104,7 @@ namespace NetStack {
         while (true) {
             uint64_t time = AEX::Sys::Time::uptime();
 
-            AEX::ScopeSpinlock scopeLock(m_queries_lock);
+            m_queries_lock.acquire();
 
             for (int i = 0; i < m_queries.count(); i++) {
                 auto& query = m_queries[i];
@@ -125,6 +125,8 @@ namespace NetStack {
                 query.retry_at = time + ARP_INTERVAL_NS;
                 query.retries++;
             }
+
+            m_queries_lock.release();
 
             AEX::Proc::Thread::sleep(100);
         }
