@@ -1,3 +1,4 @@
+#include "aex/assert.hpp"
 #include "aex/net.hpp"
 #include "aex/printk.hpp"
 
@@ -20,8 +21,7 @@ void module_enter() {
     TCPLayer::init();
 
     auto loopback_dev = new Loopback();
-    if (!loopback_dev->registerDevice())
-        kpanic("netstack: Failed to register the loopback device");
+    AEX_ASSERT(loopback_dev->registerDevice());
 
     loopback_dev->setIPv4Address(Net::ipv4_addr(127, 0, 0, 1));
     loopback_dev->setIPv4Mask(Net::ipv4_addr(255, 0, 0, 0));

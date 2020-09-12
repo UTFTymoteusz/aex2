@@ -1,4 +1,5 @@
 #include "aex/arch/sys/cpu.hpp"
+#include "aex/assert.hpp"
 #include "aex/debug.hpp"
 #include "aex/dev.hpp"
 #include "aex/dev/tree.hpp"
@@ -115,13 +116,11 @@ class RTL8139 : public Dev::NetDevice {
         while (CPU::inportb(m_io_base + CMD) & CMD_RST)
             Proc::Thread::yield();
 
-        uint32_t tx_paddr = Mem::kernel_pagemap->paddrof(m_tx_buffers);
-        if (tx_paddr > 0xFFFFFFFF)
-            kpanic("rtl8139: TX buffer address > 4gb");
+        Mem::phys_addr tx_paddr = Mem::kernel_pagemap->paddrof(m_tx_buffers);
+        AEX_ASSERT(tx_paddr <= 0xFFFFFFFF);
 
-        uint32_t rx_paddr = Mem::kernel_pagemap->paddrof(m_rx_buffer);
-        if (rx_paddr > 0xFFFFFFFF)
-            kpanic("rtl8139: RX buffer address > 4gb");
+        Mem::phys_addr rx_paddr = Mem::kernel_pagemap->paddrof(m_rx_buffer);
+        AEX_ASSERT(rx_paddr <= 0xFFFFFFFF);
 
         // Set transmit buffers addresses
         for (int i = 0; i < 4; i++)
@@ -137,7 +136,8 @@ class RTL8139 : public Dev::NetDevice {
         CPU::outportd(m_io_base + TCR, TSD_CRC | TSD_MXDMA_1024);
         CPU::outportd(m_io_base + RCR, RCR_B32K | RCR_WRAP | RCR_AAP | RCR_AB | RCR_AM | RCR_AR);
 
-        Sys::IRQ::register_handler(m_irq, [](void* dev) { ((RTL8139*) dev)->handleIRQ(); }, this);
+        Sys::IRQ::register_handler(
+            m_irq, [](void* dev) { ((RTL8139*) dev)->handleIRQ(); }, this);
 
         // IMR time
         CPU::outportw(m_io_base + IMR, IMR_ROK | IMR_ROV | IMR_FOV);
@@ -274,12 +274,12 @@ class RTL8139 : public Dev::NetDevice {
 
         if (status & ISR_FOV) {
             ack |= ISR_FOV;
-            kpanic("rtl8139: FIFO overflow\n");
+            kpanic("rtl8139: FIFO overflow");
         }
 
         if (status & ISR_ROV) {
             ack |= ISR_ROK;
-            kpanic("rtl8139: RX buffer overflow\n");
+            kpanic("rtl8139: RX buffer overflow");
         }
 
         CPU::outportw(m_io_base + ISR, ack);

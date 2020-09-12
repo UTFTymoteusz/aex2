@@ -11,7 +11,6 @@ using namespace AEX;
 using namespace AEX::Net;
 
 namespace NetStack {
-    // I need a R/W spinlock really bad
     // Also, i could have the main loop bong check an optional<Promise>, and check if its fulfilled
     // to avoid wanks with ARP
     // Or better yet, [b]oroutines
