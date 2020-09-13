@@ -906,8 +906,7 @@ namespace NetStack {
         m_lock.acquire();
 
         while (m_tx_buffer.readAvailable()) {
-            if (m_block.snd_wnd == 0)
-                kpanic("tcp: Remote window full");
+            AEX_ASSERT(m_block.snd_wnd != 0);
 
             int size =
                 min(m_tx_buffer.readAvailable(), (int) m_block.snd_wnd, (int) m_block.snd_mss);

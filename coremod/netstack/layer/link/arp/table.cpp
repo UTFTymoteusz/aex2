@@ -12,13 +12,14 @@ namespace NetStack {
     AEX::Mem::Vector<ARPTable::arp_query, 8, 8>   ARPTable::m_queries;
     AEX::Spinlock                                 ARPTable::m_queries_lock;
 
-    AEX::Proc::Thread_SP ARPTable::m_loop_thread;
+    AEX::Proc::Thread* ARPTable::m_loop_thread;
 
     void ARPTable::init() {
-        auto thread   = new AEX::Proc::Thread(nullptr, (void*) loop,
-                                            AEX::Proc::Thread::KERNEL_STACK_SIZE, nullptr);
-        m_loop_thread = thread->getSmartPointer();
+        auto thread   = AEX::Proc::Thread::create(nullptr, (void*) loop,
+                                                AEX::Proc::Thread::KERNEL_STACK_SIZE, nullptr);
+        m_loop_thread = thread.value;
         m_loop_thread->start();
+        m_loop_thread->detach();
     }
 
     AEX::optional<AEX::Net::mac_addr> ARPTable::get_mac(AEX::Net::ipv4_addr ipv4) {
@@ -104,7 +105,7 @@ namespace NetStack {
         while (true) {
             uint64_t time = AEX::Sys::Time::uptime();
 
-            AEX::ScopeSpinlock scopeLock(m_queries_lock);
+            m_queries_lock.acquire();
 
             for (int i = 0; i < m_queries.count(); i++) {
                 auto& query = m_queries[i];
@@ -125,6 +126,8 @@ namespace NetStack {
                 query.retry_at = time + ARP_INTERVAL_NS;
                 query.retries++;
             }
+
+            m_queries_lock.release();
 
             AEX::Proc::Thread::sleep(100);
         }

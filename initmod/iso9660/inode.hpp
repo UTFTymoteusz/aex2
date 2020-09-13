@@ -30,8 +30,9 @@ namespace AEX::FS {
             uint8_t buffer[256];
 
             while (ctx->pos < size) {
-                control_block->block_dev->read(buffer, m_dentry.data_lba.le * BLOCK_SIZE + ctx->pos,
-                                               sizeof(buffer));
+                ((ISO9660ControlBlock*) control_block)
+                    ->block_handle.read(buffer, m_dentry.data_lba.le * BLOCK_SIZE + ctx->pos,
+                                        sizeof(buffer));
 
                 auto ldentry = (iso9660_dentry*) buffer;
 
@@ -113,8 +114,9 @@ namespace AEX::FS {
         error_t readBlocks(void* buffer, uint64_t block, uint16_t count) {
             uint16_t block_size = control_block->block_size;
 
-            control_block->block_dev->read(
-                buffer, m_dentry.data_lba.le * block_size + block * block_size, count * block_size);
+            ((ISO9660ControlBlock*) control_block)
+                ->block_handle.read(buffer, m_dentry.data_lba.le * block_size + block * block_size,
+                                    count * block_size);
 
             return ENONE;
         }

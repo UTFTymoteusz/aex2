@@ -13,8 +13,10 @@
 constexpr auto ISO_START = BLOCK_SIZE * 0x10;
 
 namespace AEX::FS {
+    ISO9660* iso9660_fs;
+
     void ISO9660::init() {
-        new ISO9660();
+        iso9660_fs = new ISO9660();
     }
 
     ISO9660::ISO9660() : Filesystem("iso9660") {}
@@ -33,13 +35,14 @@ namespace AEX::FS {
         if (!info.value.is_block())
             return ENOTBLK;
 
-        auto block = (Dev::BlockDevice_SP) Dev::devices.get(info.value.dev_id);
-        if (!block)
+        auto handle_try = Dev::open_block_handle(info.value.dev_id);
+        if (!handle_try)
             return ENOENT;
 
-        iso9660_dentry root_dentry;
+        auto handle = handle_try.value;
 
-        uint8_t buffer[BLOCK_SIZE];
+        iso9660_dentry root_dentry;
+        uint8_t        buffer[BLOCK_SIZE];
 
         for (int i = 0; i <= 64; i++) {
             if (i == 64) {
@@ -47,17 +50,17 @@ namespace AEX::FS {
                 return EINVAL;
             }
 
-            block->read(buffer, ISO_START + BLOCK_SIZE * i, BLOCK_SIZE);
+            handle.read(buffer, ISO_START + BLOCK_SIZE * i, BLOCK_SIZE);
 
             auto header = (iso9660_vd_header*) buffer;
             if (memcmp(header->identifier, IDENTIFIER, 5) != 0)
                 return EINVAL;
 
             switch (header->type) {
-            case ios9960_vd_type::TERMINATOR:
+            case TERMINATOR:
                 i = 666; // a quick and dirty way to break out of this for loop in a switch
                 break;
-            case ios9960_vd_type::PRIMARY_VOLUME_DESCRIPTOR: {
+            case PRIMARY_VOLUME_DESCRIPTOR: {
                 auto pvd = (iso9660_primary_volume_descriptor*) buffer;
 
                 root_dentry = *((iso9660_dentry*) pvd->root_dentry_bytes);
@@ -67,6 +70,6 @@ namespace AEX::FS {
             }
         }
 
-        return new ISO9660ControlBlock(block, root_dentry);
+        return new ISO9660ControlBlock(handle, root_dentry);
     }
 }

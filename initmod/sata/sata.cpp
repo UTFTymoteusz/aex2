@@ -15,6 +15,8 @@ namespace AEX::Sys::SATA {
     extern void sd_init();
     extern void sr_init();
 
+    Tree::Bus* sata_bus;
+
     class SATA : public Tree::Driver {
         public:
         SATA() : Driver("sata") {}
@@ -38,7 +40,7 @@ namespace AEX::Sys::SATA {
 
             for (int i = 5; i >= 0; i--) {
                 auto resource = device->getResource(i);
-                if (!resource || resource.value.type != Tree::Device::resource::type_t::MEMORY)
+                if (!resource || resource.value.type != Tree::resource::MEMORY)
                     continue;
 
                 paddr = resource.value.start;
@@ -60,7 +62,7 @@ namespace AEX::Sys::SATA {
             if (Tree::bus_exists("sata"))
                 return;
 
-            new Tree::Bus("sata");
+            sata_bus = new Tree::Bus("sata");
 
             sd_init();
             sr_init();

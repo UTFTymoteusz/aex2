@@ -11,7 +11,6 @@ using namespace AEX;
 using namespace AEX::Net;
 
 namespace NetStack {
-    // I need a R/W spinlock really bad
     // Also, i could have the main loop bong check an optional<Promise>, and check if its fulfilled
     // to avoid wanks with ARP
     // Or better yet, [b]oroutines
@@ -24,15 +23,16 @@ namespace NetStack {
     uint32_t* TCPProtocol::m_port_bitmap       = nullptr;
     uint16_t  TCPProtocol::m_port_dynamic_last = 49151;
 
-    Mem::SmartPointer<Proc::Thread> TCPProtocol::m_loop_thread;
+    Proc::Thread* TCPProtocol::m_loop_thread;
 
     void TCPProtocol::init() {
         m_port_bitmap = new uint32_t[65536 / sizeof(uint32_t) / 8];
 
-        auto thread = new Proc::Thread(nullptr, (void*) loop, 16384, nullptr);
+        auto thread = Proc::Thread::create(nullptr, (void*) loop, 16384, nullptr);
 
-        m_loop_thread = thread->getSmartPointer();
+        m_loop_thread = thread.value;
         m_loop_thread->start();
+        m_loop_thread->detach();
     }
 
     void TCPProtocol::loop() {

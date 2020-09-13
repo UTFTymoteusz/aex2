@@ -22,7 +22,7 @@ all:
 	cd coremod && $(MAKE) all KERNELMOD_DIR="$(KERNELMOD_DIR)"
 	cd archmod && $(MAKE) all KERNELMOD_DIR="$(KERNELMOD_DIR)"
 	cd initmod && $(MAKE) all INITMOD_DIR="$(INITMOD_DIR)"
-	cd kernel  && $(MAKE) all
+	cd kernel  && $(MAKE) all -j 8
 
 	# cd libc && $(MAKE) all
 	
