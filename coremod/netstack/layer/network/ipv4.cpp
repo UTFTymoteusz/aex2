@@ -12,13 +12,14 @@ namespace NetStack {
     AEX::Spinlock                                   IPv4Layer::m_retx_queue_lock;
     uint32_t                                        IPv4Layer::m_retx_queue_size;
 
-    AEX::Proc::Thread_SP IPv4Layer::m_loop_thread;
+    AEX::Proc::Thread* IPv4Layer::m_loop_thread;
 
     void IPv4Layer::init() {
-        auto thread   = new AEX::Proc::Thread(nullptr, (void*) loop,
-                                            AEX::Proc::Thread::KERNEL_STACK_SIZE, nullptr);
-        m_loop_thread = thread->getSmartPointer();
+        auto thread   = AEX::Proc::Thread::create(nullptr, (void*) loop,
+                                                AEX::Proc::Thread::KERNEL_STACK_SIZE, nullptr);
+        m_loop_thread = thread.value;
         m_loop_thread->start();
+        m_loop_thread->detach();
     }
 
     int IPv4Layer::encaps_len(int payload_len) {

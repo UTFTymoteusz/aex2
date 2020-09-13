@@ -38,8 +38,8 @@ namespace NetStack {
         static AEX::Spinlock                        m_retx_queue_lock;
         static uint32_t                             m_retx_queue_size;
 
-        static AEX::Proc::Thread_SP m_loop_thread;
-        static AEX::IPC::Event      m_loop_event;
+        static AEX::Proc::Thread* m_loop_thread;
+        static AEX::IPC::Event    m_loop_event;
 
         static void loop();
         static bool retx();

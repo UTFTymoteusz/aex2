@@ -38,7 +38,7 @@ namespace NetStack {
         static uint32_t*     m_port_bitmap;
         static uint16_t      m_port_dynamic_last;
 
-        static AEX::Mem::SmartPointer<AEX::Proc::Thread> m_loop_thread;
+        static AEX::Proc::Thread* m_loop_thread;
 
         static void pushSocket(TCPSocket* socket);
 

@@ -19,7 +19,8 @@
         "istream": "cpp",
         "ostream": "cpp",
         "sstream": "cpp",
-        "memory_resource": "cpp"
+        "memory_resource": "cpp",
+        "cstdlib": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "clang-tidy.compilerArgs": [

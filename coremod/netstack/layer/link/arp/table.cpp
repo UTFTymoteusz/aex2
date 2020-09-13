@@ -12,13 +12,14 @@ namespace NetStack {
     AEX::Mem::Vector<ARPTable::arp_query, 8, 8>   ARPTable::m_queries;
     AEX::Spinlock                                 ARPTable::m_queries_lock;
 
-    AEX::Proc::Thread_SP ARPTable::m_loop_thread;
+    AEX::Proc::Thread* ARPTable::m_loop_thread;
 
     void ARPTable::init() {
-        auto thread   = new AEX::Proc::Thread(nullptr, (void*) loop,
-                                            AEX::Proc::Thread::KERNEL_STACK_SIZE, nullptr);
-        m_loop_thread = thread->getSmartPointer();
+        auto thread   = AEX::Proc::Thread::create(nullptr, (void*) loop,
+                                                AEX::Proc::Thread::KERNEL_STACK_SIZE, nullptr);
+        m_loop_thread = thread.value;
         m_loop_thread->start();
+        m_loop_thread->detach();
     }
 
     AEX::optional<AEX::Net::mac_addr> ARPTable::get_mac(AEX::Net::ipv4_addr ipv4) {
