@@ -37,7 +37,7 @@ runnet:
 	--enable-kvm
 	
 run:
-	qemu-system-x86_64 -monitor stdio -machine type=q35 -smp 4 -m 32M -cdrom aex.iso --enable-kvm
+	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 4 -m 32M -cdrom aex.iso --enable-kvm
 
 clean:
 	cd coremod && $(MAKE) clean
