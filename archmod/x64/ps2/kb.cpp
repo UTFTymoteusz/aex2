@@ -49,7 +49,7 @@ void kb_irq(void*) {
     static bool released = false;
     static bool extra    = false;
 
-    uint8_t byte = CPU::inportb(PS2_IO_DATA);
+    uint8_t byte = CPU::inb(PS2_IO_DATA);
 
     if (byte == 0xE0) {
         extra = true;
@@ -86,23 +86,23 @@ uint8_t sendCommand(uint8_t cmd) {
     uint8_t ret;
 
     for (int i = 0; i < 3; i++) {
-        while (CPU::inportb(PS2_IO_STATUS) & PS2_STATUS_INPUT_FULL)
+        while (CPU::inb(PS2_IO_STATUS) & PS2_STATUS_INPUT_FULL)
             ;
 
-        CPU::outportb(PS2_IO_DATA, cmd);
+        CPU::outb(PS2_IO_DATA, cmd);
 
-        while (!(CPU::inportb(PS2_IO_STATUS) & PS2_STATUS_OUTPUT_FULL))
+        while (!(CPU::inb(PS2_IO_STATUS) & PS2_STATUS_OUTPUT_FULL))
             ;
 
-        ret = CPU::inportb(PS2_IO_DATA);
+        ret = CPU::inb(PS2_IO_DATA);
         if (ret == 0x00 || ret == 0xFE || ret == 0xFF)
             continue;
 
         break;
     }
 
-    while (CPU::inportb(PS2_IO_STATUS) & PS2_STATUS_OUTPUT_FULL)
-        CPU::inportb(PS2_IO_DATA);
+    while (CPU::inb(PS2_IO_STATUS) & PS2_STATUS_OUTPUT_FULL)
+        CPU::inb(PS2_IO_DATA);
 
     return ret;
 }
@@ -111,20 +111,20 @@ void sendCommand(uint8_t cmd, uint8_t sub) {
     uint8_t ret;
 
     for (int i = 0; i < 3; i++) {
-        while (CPU::inportb(PS2_IO_STATUS) & PS2_STATUS_INPUT_FULL)
+        while (CPU::inb(PS2_IO_STATUS) & PS2_STATUS_INPUT_FULL)
             ;
 
-        CPU::outportb(PS2_IO_DATA, cmd);
+        CPU::outb(PS2_IO_DATA, cmd);
 
-        while (CPU::inportb(PS2_IO_STATUS) & PS2_STATUS_INPUT_FULL)
+        while (CPU::inb(PS2_IO_STATUS) & PS2_STATUS_INPUT_FULL)
             ;
 
-        CPU::outportb(PS2_IO_DATA, sub);
+        CPU::outb(PS2_IO_DATA, sub);
 
-        while (!(CPU::inportb(PS2_IO_STATUS) & PS2_STATUS_OUTPUT_FULL))
+        while (!(CPU::inb(PS2_IO_STATUS) & PS2_STATUS_OUTPUT_FULL))
             ;
 
-        ret = CPU::inportb(PS2_IO_DATA);
+        ret = CPU::inb(PS2_IO_DATA);
         if (ret == 0x00 || ret == 0xFE || ret == 0xFF)
             continue;
 

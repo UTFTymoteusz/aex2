@@ -89,27 +89,27 @@ extern "C" void* laihost_scan(const char* sig, size_t index) {
 
 
 extern "C" void laihost_outb(uint16_t port, uint8_t val) {
-    Sys::CPU::outportb(port, val);
+    Sys::CPU::outb(port, val);
 }
 
 extern "C" void laihost_outw(uint16_t port, uint16_t val) {
-    Sys::CPU::outportw(port, val);
+    Sys::CPU::outw(port, val);
 }
 
 extern "C" void laihost_outd(uint16_t port, uint32_t val) {
-    Sys::CPU::outportd(port, val);
+    Sys::CPU::outd(port, val);
 }
 
 extern "C" uint8_t laihost_inb(uint16_t port) {
-    return Sys::CPU::inportb(port);
+    return Sys::CPU::inb(port);
 }
 
 extern "C" uint16_t laihost_inw(uint16_t port) {
-    return Sys::CPU::inportw(port);
+    return Sys::CPU::inw(port);
 }
 
 extern "C" uint32_t laihost_ind(uint16_t port) {
-    return Sys::CPU::inportd(port);
+    return Sys::CPU::ind(port);
 }
 
 

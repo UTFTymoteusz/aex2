@@ -65,7 +65,7 @@ namespace NetStack {
         socket->source_port = port;
 
         sockets_lock.acquire_write();
-        sockets.pushBack(socket);
+        sockets.push(socket);
         sockets_lock.release_write();
 
         printk("new tcp socket with source port of %i\n", socket->source_port);
@@ -173,7 +173,7 @@ namespace NetStack {
 
     void TCPProtocol::pushSocket(TCPSocket* socket) {
         sockets_lock.acquire_write();
-        sockets.pushBack(socket);
+        sockets.push(socket);
         sockets_lock.release_write();
     }
 }

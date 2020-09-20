@@ -98,7 +98,7 @@ namespace NetStack {
         entry.ipv4 = ipv4;
         entry.mac  = mac;
 
-        m_entries.pushBack(entry);
+        m_entries.push(entry);
     }
 
     void ARPTable::loop() {
@@ -156,7 +156,7 @@ namespace NetStack {
 
         query.ipv4 = ipv4;
 
-        m_queries.pushBack(query);
+        m_queries.push(query);
         m_queries_lock.release();
     }
 

@@ -36,8 +36,8 @@ class PS2 : public Tree::Driver {
         sendCommand(PS2_CTRL_CMD_DISABLE_PORT1);
 
         // Flushing buffers
-        while (CPU::inportb(PS2_IO_STATUS) & 0x01)
-            CPU::inportb(PS2_IO_DATA);
+        while (CPU::inb(PS2_IO_STATUS) & 0x01)
+            CPU::inb(PS2_IO_DATA);
 
         uint8_t byte = sendCommandGetResponse(PS2_CTRL_CMD_READ_CFG_BYTE);
 
@@ -60,30 +60,30 @@ class PS2 : public Tree::Driver {
 
     private:
     void sendCommand(uint8_t cmd) {
-        while (CPU::inportb(PS2_IO_STATUS) & 0x02)
+        while (CPU::inb(PS2_IO_STATUS) & 0x02)
             ;
 
-        CPU::outportb(PS2_IO_COMMAND, cmd);
+        CPU::outb(PS2_IO_COMMAND, cmd);
     }
 
     void sendCommand(uint8_t cmd, uint8_t byte) {
-        while (CPU::inportb(PS2_IO_STATUS) & 0x02)
+        while (CPU::inb(PS2_IO_STATUS) & 0x02)
             ;
 
-        CPU::outportb(PS2_IO_COMMAND, cmd);
+        CPU::outb(PS2_IO_COMMAND, cmd);
 
-        while (CPU::inportb(PS2_IO_STATUS) & 0x02)
+        while (CPU::inb(PS2_IO_STATUS) & 0x02)
             ;
 
-        CPU::outportb(PS2_IO_DATA, byte);
+        CPU::outb(PS2_IO_DATA, byte);
     }
 
     uint8_t sendCommandGetResponse(uint8_t cmd) {
         sendCommand(cmd);
-        while (!(CPU::inportb(PS2_IO_STATUS) & 0x01))
+        while (!(CPU::inb(PS2_IO_STATUS) & 0x01))
             ;
 
-        return CPU::inportb(PS2_IO_DATA);
+        return CPU::inb(PS2_IO_DATA);
     }
 };
 

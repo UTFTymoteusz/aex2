@@ -44,7 +44,7 @@ namespace NetStack {
 
         // Probably should only add this once bind()ing or something
         sockets_lock.acquire();
-        sockets.pushBack(socket);
+        sockets.push(socket);
         sockets_lock.release();
 
         printk("new udp socket with source port of %i\n", socket->source_port);

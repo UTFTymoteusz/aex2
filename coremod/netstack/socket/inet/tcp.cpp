@@ -416,7 +416,7 @@ namespace NetStack {
         seg->ack_with = m_block.snd_nxt;
 
         m_lock.acquire();
-        m_retransmission_queue.pushBack(seg);
+        m_retransmission_queue.push(seg);
         m_lock.release();
 
         sendSegment(seg);
@@ -471,7 +471,7 @@ namespace NetStack {
         seg->ack_with = m_block.snd_nxt;
 
         m_lock.acquire();
-        m_retransmission_queue.pushBack(seg);
+        m_retransmission_queue.push(seg);
         m_lock.release();
 
         sendSegment(seg);
@@ -522,7 +522,7 @@ namespace NetStack {
         entry.source_address = addr;
         entry.source_port    = port;
 
-        m_listen_queue->pushBack(entry);
+        m_listen_queue->push(entry);
 
         return &(*m_listen_queue)[m_listen_queue->count() - 1];
     }
@@ -864,7 +864,7 @@ namespace NetStack {
                     entry->block.state = TCP_ESTABLISHED;
 
                     auto sock = new TCPSocket(this, entry);
-                    m_accept_queue->pushBack(*sock->thisSmartPtr);
+                    m_accept_queue->push(*sock->thisSmartPtr);
 
                     removeEntry(src, src_port);
 
@@ -929,7 +929,7 @@ namespace NetStack {
 
             seg->ack_with = m_block.snd_nxt;
 
-            m_retransmission_queue.pushBack(seg);
+            m_retransmission_queue.push(seg);
 
             m_lock.release();
             sendSegment(seg);

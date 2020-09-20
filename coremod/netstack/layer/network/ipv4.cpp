@@ -167,7 +167,7 @@ namespace NetStack {
 
         m_retx_queue_lock.acquire();
         m_retx_queue_size += sizeof(retx_frame) + AEX::Mem::Heap::msize_total(len);
-        m_retx_queue.pushBack(frame);
+        m_retx_queue.push(frame);
         m_retx_queue_lock.release();
     }
 
