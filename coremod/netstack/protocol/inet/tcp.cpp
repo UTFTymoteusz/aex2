@@ -28,7 +28,7 @@ namespace NetStack {
     void TCPProtocol::init() {
         m_port_bitmap = new uint32_t[65536 / sizeof(uint32_t) / 8];
 
-        auto thread = Proc::Thread::create(nullptr, (void*) loop, 16384, nullptr);
+        auto thread = Proc::Thread::create(1, (void*) loop, 16384, nullptr);
 
         m_loop_thread = thread.value;
         m_loop_thread->start();

@@ -15,7 +15,7 @@ namespace NetStack {
     AEX::Proc::Thread* ARPTable::m_loop_thread;
 
     void ARPTable::init() {
-        auto thread   = AEX::Proc::Thread::create(nullptr, (void*) loop,
+        auto thread   = AEX::Proc::Thread::create(1, (void*) loop,
                                                 AEX::Proc::Thread::KERNEL_STACK_SIZE, nullptr);
         m_loop_thread = thread.value;
         m_loop_thread->start();

@@ -14,6 +14,9 @@ void test_processes() {
         new Proc::Process("/bin/bigbong", Proc::Process::current()->pid, Mem::kernel_pagemap);
 
     auto thread =
-        Proc::Thread::create(process, (void*) test_process_thread, 8192, Mem::kernel_pagemap);
+        Proc::Thread::create(process->pid, (void*) test_process_thread, 8192, Mem::kernel_pagemap);
     thread.value->detach();
+
+    int  status = 0;
+    auto pid    = Proc::Process::wait(status);
 }
