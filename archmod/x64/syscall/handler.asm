@@ -23,7 +23,14 @@ handler:
 
     call syscall_prepare
     call [r10]
+
+    push rax
+    push rdx
+
     call syscall_done
+
+    pop rdx
+    pop rax
 
     pop r11
     pop rcx
