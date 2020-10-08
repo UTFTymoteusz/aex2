@@ -6,4 +6,7 @@
 	url = https://github.com/qword-os/lai.git
 [submodule "libc"]
 	path = libc
-	url = https://github.com/UTFTymoteusz/aex2libc.git
+	url = https://github.com/UTFTymoteusz/aexlibc2.git
+[submodule "init"]
+	path = init
+	url = https://github.com/UTFTymoteusz/aexinit2.git

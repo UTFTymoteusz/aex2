@@ -10,7 +10,7 @@ void test_process_thread() {
 }
 
 void test_processes() {
-    auto process =
+    /*auto process =
         new Proc::Process("/bin/bigbong", Proc::Process::current()->pid, Mem::kernel_pagemap);
     process->ready();
 
@@ -19,5 +19,5 @@ void test_processes() {
     thread.value->detach();
 
     int  status = 0;
-    auto pid    = Proc::Process::wait(status);
+    auto pid    = Proc::Process::wait(status);*/
 }

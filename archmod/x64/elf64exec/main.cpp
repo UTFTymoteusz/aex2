@@ -10,8 +10,6 @@ const char* MODULE_NAME = "elf64exec";
 Proc::Executor* executor;
 
 void module_enter() {
-    AEX_ASSERT(Proc::exec("/bin/test") != ENONE);
-
     executor = new Elf64Executor();
     Proc::registerExecutor(executor);
 }
