@@ -19,7 +19,7 @@ void module_enter() {
     test_mmap();
     test_paging();
     test_threads();
-    test_processes();
+    // test_processes();
 
     // while (true)
     //    printk("a: %c ", Dev::TTY::VTTYs[Dev::TTY::ROOT_TTY]->read());

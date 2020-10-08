@@ -12,6 +12,7 @@ void test_process_thread() {
 void test_processes() {
     auto process =
         new Proc::Process("/bin/bigbong", Proc::Process::current()->pid, Mem::kernel_pagemap);
+    process->ready();
 
     auto thread =
         Proc::Thread::create(process->pid, (void*) test_process_thread, 8192, Mem::kernel_pagemap);
