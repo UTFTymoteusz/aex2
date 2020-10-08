@@ -4,3 +4,6 @@
 [submodule "coremod/lai/lai"]
 	path = coremod/lai/lai
 	url = https://github.com/qword-os/lai.git
+[submodule "libc"]
+	path = libc
+	url = https://github.com/UTFTymoteusz/aex2libc.git
