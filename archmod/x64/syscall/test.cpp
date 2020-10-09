@@ -2,7 +2,7 @@
 #include "aex/printk.hpp"
 #include "aex/sys/syscall.hpp"
 
-#include "ids.hpp"
+#include "syscallids.h"
 
 #include <stdint.h>
 
@@ -36,9 +36,9 @@ error_t test5(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e) {
 void register_test() {
     auto table = Sys::default_table();
 
-    table[251] = (void*) test1;
-    table[252] = (void*) test2;
-    table[253] = (void*) test3;
-    table[254] = (void*) test4;
-    table[255] = (void*) test5;
+    table[SYS_TEST1] = (void*) test1;
+    table[SYS_TEST2] = (void*) test2;
+    table[SYS_TEST3] = (void*) test3;
+    table[SYS_TEST4] = (void*) test4;
+    table[SYS_TEST5] = (void*) test5;
 }
