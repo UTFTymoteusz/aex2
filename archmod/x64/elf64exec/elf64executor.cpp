@@ -69,7 +69,5 @@ error_t Elf64Executor::exec(const char* path, Proc::Process* process) {
     if (!thread_try)
         return EBOTHER;
 
-    thread_try.value->start();
-
     return ENONE;
 }

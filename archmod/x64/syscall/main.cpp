@@ -16,6 +16,7 @@ extern "C" void* handler(uint64_t id);
 void             register_syscalls();
 void             install_handler();
 
+void register_fs();
 void register_proc();
 void register_test();
 
@@ -34,6 +35,7 @@ void install_handler() {
 }
 
 void register_syscalls() {
+    register_fs();
     register_proc();
     register_test();
 }

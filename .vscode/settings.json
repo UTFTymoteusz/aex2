@@ -20,7 +20,11 @@
         "ostream": "cpp",
         "sstream": "cpp",
         "memory_resource": "cpp",
-        "cstdlib": "cpp"
+        "cstdlib": "cpp",
+        "optional": "cpp",
+        "system_error": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "clang-tidy.compilerArgs": [
