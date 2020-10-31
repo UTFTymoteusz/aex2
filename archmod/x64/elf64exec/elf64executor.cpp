@@ -11,7 +11,7 @@ using namespace AEX;
 error_t Elf64Executor::exec(const char* path, Proc::Process* process) {
     printk("elf64exec: Got a request for %s\n", path);
 
-    auto file_try = FS::File::open(path);
+    auto file_try = FS::File::open(path, FS::O_RD);
     if (!file_try)
         return file_try.error_code;
 
