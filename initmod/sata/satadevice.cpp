@@ -95,6 +95,9 @@ namespace AEX::Sys::SATA {
     }
 
     bool SATADevice::issueCMD(int slot) {
+        while (hba_port->task_file_data & (AHCI::DEV_BUSY | AHCI::DEV_DRQ))
+            ;
+
         size_t counter = 0;
 
         while (true) {
@@ -114,16 +117,15 @@ namespace AEX::Sys::SATA {
     }
 
     int SATADevice::findSlot() {
-        while (true)
-            for (int i = 0; i < max_commands; i++) {
-                ScopeSpinlock scopeLock(m_lock);
+        while (true) {
+            ScopeSpinlock scopeLock(m_lock);
 
+            for (int i = 0; i < max_commands; i++)
                 if (!(m_command_slots & (1 << i))) {
                     m_command_slots |= (1 << i);
-
                     return i;
                 }
-            }
+        }
     }
 
     void SATADevice::releaseSlot(int slot) {
@@ -177,11 +179,7 @@ namespace AEX::Sys::SATA {
         fis->lba1 = 0x0008;
         fis->lba2 = 0x0008;
 
-        while (hba_port->task_file_data & (AHCI::DEV_BUSY | AHCI::DEV_DRQ))
-            ;
-
         issueCMD(slot);
-
         releaseSlot(slot);
     }
 
