@@ -18,7 +18,7 @@ namespace NetStack {
         if (len < sizeof(arp_header) + header->hardware_len + header->protocol_len)
             return;
 
-        uint32_t uuid = to_arp_uuid(header->hardware_type, header->protocol_type);
+        auto uuid = to_arp_uuid(header->hardware_type, header->protocol_type);
 
         switch (uuid) {
         case to_arp_uuid(ARP_ETHERNET, ETH_IPv4):

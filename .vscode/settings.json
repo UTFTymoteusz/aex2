@@ -24,7 +24,8 @@
         "optional": "cpp",
         "system_error": "cpp",
         "tuple": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "atomic": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "clang-tidy.compilerArgs": [
@@ -35,6 +36,8 @@
         "-Icoremod/rtl8139/",
         "-Iinitmod/iso9660/",
         "-Iinitmod/sata/",
+        "-Ilibc/",
+        "-Ilibc/include/",
         "-Ikernel/",
         "-Ikernel/arch/x64/",
         "-Ikernel/arch/x64/include/",

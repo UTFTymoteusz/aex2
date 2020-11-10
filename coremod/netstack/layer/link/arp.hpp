@@ -2,12 +2,13 @@
 
 #include "aex/dev/netdevice.hpp"
 
+#include "layer/link/arp/types.hpp"
 #include "netstack/arp.hpp"
 
 #include <stdint.h>
 
 namespace NetStack {
-    constexpr uint32_t to_arp_uuid(uint16_t hardware, uint16_t protocol) {
+    constexpr arp_uuid_t to_arp_uuid(uint16_t hardware, uint16_t protocol) {
         return (hardware) + (protocol << 16);
     }
 

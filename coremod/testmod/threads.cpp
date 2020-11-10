@@ -7,7 +7,7 @@ using namespace AEX;
 
 namespace AEX::Proc {
     void debug_print_cpu_jobs();
-    void debug_print_list();
+    void debug_print_threads();
 }
 
 void boi_a() {

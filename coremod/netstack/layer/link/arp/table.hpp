@@ -6,6 +6,7 @@
 #include "aex/optional.hpp"
 #include "aex/proc/thread.hpp"
 
+#include "layer/link/arp/types.hpp"
 #include "netstack/arp.hpp"
 
 namespace NetStack {
@@ -24,9 +25,9 @@ namespace NetStack {
 
         private:
         struct arp_entry {
-            uint32_t uuid;
-            uint64_t set_at;
-            bool     updating;
+            arp_uuid_t uuid;
+            uint64_t   set_at;
+            bool       updating;
 
             union {
                 AEX::Net::ipv4_addr ipv4;
@@ -39,9 +40,9 @@ namespace NetStack {
         };
 
         struct arp_query {
-            uint32_t uuid;
-            uint64_t retry_at;
-            uint32_t retries;
+            arp_uuid_t uuid;
+            uint64_t   retry_at;
+            uint32_t   retries;
 
             union {
                 AEX::Net::ipv4_addr ipv4;

@@ -8,6 +8,10 @@ handler:
     push rcx
     push r11
 
+    push rbp
+    push 0
+    mov rbp, rsp
+
     and r12, 0xFF
 
     mov rax, r12
@@ -31,6 +35,9 @@ handler:
 
     pop rdx
     pop rax
+
+    pop rbp
+    pop rbp
 
     pop r11
     pop rcx

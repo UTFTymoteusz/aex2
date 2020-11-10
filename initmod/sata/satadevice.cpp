@@ -95,18 +95,20 @@ namespace AEX::Sys::SATA {
     }
 
     bool SATADevice::issueCMD(int slot) {
-        hba_port->command_issue = (1 << slot);
+        size_t counter = 0;
 
         while (true) {
-            if (!(hba_port->command_issue & (1 << slot)))
-                break;
+            hba_port->command_issue |= (1 << slot);
+
+            if (counter++ > 100000000)
+                kpanic("sata: issueCMD() stuck");
 
             if (hba_port->interrupt_status & (1 << 30))
                 return false;
-        }
 
-        if (hba_port->interrupt_status & (1 << 30))
-            return false;
+            if (!(hba_port->command_issue & (1 << slot)))
+                break;
+        }
 
         return true;
     }
