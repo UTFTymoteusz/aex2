@@ -163,6 +163,6 @@ uint8_t acpi_set_pci_pin(uint8_t bus, uint8_t device, uint8_t function, uint8_t 
 }
 
 error_t acpi_poweroff() {
-    // lai_enter_sleep(5);
+    lai_enter_sleep(5);
     return ESHUTDOWN;
 }
