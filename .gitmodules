@@ -2,7 +2,7 @@
 	path = kernel
 	url = https://github.com/UTFTymoteusz/aexkernel2.git
 [submodule "coremod/lai/lai"]
-	path = coremod/lai/lai
+	path = mod/core/lai/lai
 	url = https://github.com/qword-os/lai.git
 [submodule "libc"]
 	path = libc

@@ -2,11 +2,12 @@ ARCH ?= x64
 
 ISO := iso/
 
-SYSTEM_DIR    := $(shell pwd)/$(ISO)sys/
-KERNELMOD_DIR := $(SYSTEM_DIR)core/
-INITMOD_DIR   := $(SYSTEM_DIR)init/
+ROOT_DIR      := $(shell pwd)/$(ISO)
+KERNELMOD_DIR := $(ROOT_DIR)sys/core/
+INITMOD_DIR   := $(ROOT_DIR)sys/init/
 
 CROSSGCCPATH := $(shell which x86_64-aex2-elf-gcc)
+KERNEL_SRC   := $(shell pwd)/kernel/
 
 .PHONY: iso
 
@@ -25,20 +26,18 @@ all:
 	mkdir -p "$(shell pwd)/$(ISO)sys/init/"
 	mkdir -p "$(shell pwd)/$(ISO)boot/"
 	
-	cd coremod && $(MAKE) all KERNELMOD_DIR="$(KERNELMOD_DIR)" ARCH="$(ARCH)"
-	cd archmod && $(MAKE) all KERNELMOD_DIR="$(KERNELMOD_DIR)" ARCH="$(ARCH)"
-	cd initmod && $(MAKE) all INITMOD_DIR="$(INITMOD_DIR)"     ARCH="$(ARCH)"
-	cd kernel  && $(MAKE) all -j 8   						   ARCH="$(ARCH)"
-	cd libc    && $(MAKE) all install 						   ARCH="$(ARCH)"
+	cd mod    && $(MAKE) all KERNELMOD_DIR="$(KERNELMOD_DIR)" KERNEL_SRC="$(KERNEL_SRC)" ARCH="$(ARCH)"
+	cd kernel && $(MAKE) all -j 8 ROOT_DIR="$(ROOT_DIR)"      ARCH="$(ARCH)"
+	cd libc   && $(MAKE) all install 						  ARCH="$(ARCH)"
 	
-	cd kernel && $(MAKE) copy SYSTEM_DIR="$(SYSTEM_DIR)"
+	cd kernel && $(MAKE) copy ROOT_DIR="$(ROOT_DIR)"
 
 ifndef CROSSGCCPATH
 	@echo x86_64-aex2-elf-gcc not found, skipping building any userspace binaries
 	@exit 0
 endif
 
-	cd init && $(MAKE) all copy COPY_DIR="$(SYSTEM_DIR)"
+	cd init && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)sys/"
 
 iso:
 	grub-mkrescue -o aex.iso $(ISO) 2> /dev/null
@@ -52,12 +51,10 @@ run:
 	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 1 -m 32M -cdrom aex.iso --enable-kvm
 
 clean:
-	cd coremod && $(MAKE) clean
-	cd archmod && $(MAKE) clean
-	cd initmod && $(MAKE) clean
-	cd kernel  && $(MAKE) clean
-	cd libc    && $(MAKE) clean
-	cd init    && $(MAKE) clean
+	cd mod    && $(MAKE) clean
+	cd kernel && $(MAKE) clean
+	cd libc   && $(MAKE) clean
+	cd init   && $(MAKE) clean
 
 	rm -rf $(ISO)sys/core/
 	rm -rf $(ISO)sys/init/
