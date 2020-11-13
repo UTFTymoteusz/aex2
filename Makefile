@@ -3,8 +3,8 @@ ARCH ?= x64
 ISO := iso/
 
 ROOT_DIR      := $(shell pwd)/$(ISO)
-KERNELMOD_DIR := $(ROOT_DIR)sys/core/
-INITMOD_DIR   := $(ROOT_DIR)sys/init/
+KERNELMOD_DIR := $(ROOT_DIR)sys/mod/core/
+INITMOD_DIR   := $(ROOT_DIR)sys/mod/init/
 
 CROSSGCCPATH := $(shell which x86_64-aex2-elf-gcc)
 KERNEL_SRC   := $(shell pwd)/kernel/
@@ -12,18 +12,17 @@ KERNEL_SRC   := $(shell pwd)/kernel/
 .PHONY: iso
 
 format:
-	cd coremod && $(MAKE) format
-	cd archmod && $(MAKE) format
-	cd initmod && $(MAKE) format
-	cd kernel  && $(MAKE) format
-	cd libc    && $(MAKE) format
-	cd init    && $(MAKE) format
+	cd mod    && $(MAKE) format
+	cd kernel && $(MAKE) format
+	cd libc   && $(MAKE) format
+	cd init   && $(MAKE) format
 
 all:
 	mkdir -p "$(shell pwd)/$(ISO)"
 	mkdir -p "$(shell pwd)/$(ISO)sys/"
-	mkdir -p "$(shell pwd)/$(ISO)sys/core/"
-	mkdir -p "$(shell pwd)/$(ISO)sys/init/"
+	mkdir -p "$(shell pwd)/$(ISO)sys/mod/"
+	mkdir -p "$(shell pwd)/$(ISO)sys/mod/core/"
+	mkdir -p "$(shell pwd)/$(ISO)sys/mod/init/"
 	mkdir -p "$(shell pwd)/$(ISO)boot/"
 	
 	cd mod    && $(MAKE) all KERNELMOD_DIR="$(KERNELMOD_DIR)" KERNEL_SRC="$(KERNEL_SRC)" ARCH="$(ARCH)"
@@ -56,8 +55,8 @@ clean:
 	cd libc   && $(MAKE) clean
 	cd init   && $(MAKE) clean
 
-	rm -rf $(ISO)sys/core/
-	rm -rf $(ISO)sys/init/
+	rm -rf $(ISO)sys/mod/core/
+	rm -rf $(ISO)sys/mod/init/
 
 git:
 	git submodule init
