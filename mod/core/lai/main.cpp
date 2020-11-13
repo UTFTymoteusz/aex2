@@ -7,6 +7,7 @@
 #include "aex/string.hpp"
 #include "aex/sys/acpi.hpp"
 #include "aex/sys/pci.hpp"
+#include "aex/sys/power.hpp"
 
 #include "lai/core.h"
 #include "lai/helpers/pci.h"
@@ -24,6 +25,7 @@ using namespace AEX::Sys;
 const char* MODULE_NAME = "lai";
 
 uint8_t acpi_set_pci_pin(uint8_t bus, uint8_t device, uint8_t function, uint8_t pin);
+error_t acpi_poweroff();
 
 void module_enter() {
     printk("lai: ACPI revision 0x%02x\n", ACPI::revision);
@@ -32,6 +34,8 @@ void module_enter() {
     lai_create_namespace();
 
     lai_enable_acpi(1);
+
+    Sys::Power::register_poweroff_handler(1, acpi_poweroff);
 
     register_dynamic_symbol("acpi_set_pci_pin", (void*) acpi_set_pci_pin);
 }
@@ -89,27 +93,27 @@ extern "C" void* laihost_scan(const char* sig, size_t index) {
 
 
 extern "C" void laihost_outb(uint16_t port, uint8_t val) {
-    Sys::CPU::outportb(port, val);
+    Sys::CPU::outb(port, val);
 }
 
 extern "C" void laihost_outw(uint16_t port, uint16_t val) {
-    Sys::CPU::outportw(port, val);
+    Sys::CPU::outw(port, val);
 }
 
 extern "C" void laihost_outd(uint16_t port, uint32_t val) {
-    Sys::CPU::outportd(port, val);
+    Sys::CPU::outd(port, val);
 }
 
 extern "C" uint8_t laihost_inb(uint16_t port) {
-    return Sys::CPU::inportb(port);
+    return Sys::CPU::inb(port);
 }
 
 extern "C" uint16_t laihost_inw(uint16_t port) {
-    return Sys::CPU::inportw(port);
+    return Sys::CPU::inw(port);
 }
 
 extern "C" uint32_t laihost_ind(uint16_t port) {
-    return Sys::CPU::inportd(port);
+    return Sys::CPU::ind(port);
 }
 
 
@@ -156,4 +160,9 @@ uint8_t acpi_set_pci_pin(uint8_t bus, uint8_t device, uint8_t function, uint8_t 
     lai_pci_route_pin(&aaa, 0, bus, device, function, pin);
 
     return aaa.base;
+}
+
+error_t acpi_poweroff() {
+    lai_enter_sleep(5);
+    return ESHUTDOWN;
 }
