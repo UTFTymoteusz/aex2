@@ -25,7 +25,13 @@
         "system_error": "cpp",
         "tuple": "cpp",
         "utility": "cpp",
-        "atomic": "cpp"
+        "atomic": "cpp",
+        "iosfwd": "cpp",
+        "streambuf": "cpp",
+        "algorithm": "cpp",
+        "hash_map": "c",
+        "string_view": "c",
+        "initializer_list": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "clang-tidy.compilerArgs": [
