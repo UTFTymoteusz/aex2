@@ -5,6 +5,7 @@
 !.clang-format
 !.gitignore
 !.gitmodules
+!iso/etc/*
 
 **.d
 **.o
