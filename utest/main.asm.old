@@ -1,0 +1,9 @@
+global main
+main:
+    mov r12, 2
+    mov rdi, 2500000000
+
+    syscall
+
+    mov rax, 5
+    ret
