@@ -33,7 +33,10 @@
         "string_view": "c",
         "initializer_list": "c",
         "thread": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "bitset": "cpp",
+        "chrono": "cpp",
+        "random": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "clang-tidy.compilerArgs": [

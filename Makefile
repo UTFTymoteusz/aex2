@@ -17,14 +17,16 @@ format:
 	cd libc   && $(MAKE) format
 	cd init   && $(MAKE) format
 	cd utest  && $(MAKE) format
+	cd bin    && $(MAKE) format
 
 all:
 	mkdir -p "$(shell pwd)/$(ISO)"
+	mkdir -p "$(shell pwd)/$(ISO)bin/"
+	mkdir -p "$(shell pwd)/$(ISO)boot/"
 	mkdir -p "$(shell pwd)/$(ISO)sys/"
 	mkdir -p "$(shell pwd)/$(ISO)sys/mod/"
 	mkdir -p "$(shell pwd)/$(ISO)sys/mod/core/"
 	mkdir -p "$(shell pwd)/$(ISO)sys/mod/init/"
-	mkdir -p "$(shell pwd)/$(ISO)boot/"
 	
 	cd mod    && $(MAKE) all KERNELMOD_DIR="$(KERNELMOD_DIR)" KERNEL_SRC="$(KERNEL_SRC)" ARCH="$(ARCH)"
 	cd kernel && $(MAKE) all -j 8 ROOT_DIR="$(ROOT_DIR)"      ARCH="$(ARCH)"
@@ -37,6 +39,7 @@ ifndef CROSSGCCPATH
 	exit 0
 endif
 
+	cd bin   && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)bin/"
 	cd init  && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)sys/"
 	cd utest && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)sys/"
 
@@ -57,7 +60,9 @@ clean:
 	cd kernel && $(MAKE) clean
 	cd libc   && $(MAKE) clean
 	cd init   && $(MAKE) clean
+	cd bin    && $(MAKE) clean
 
+	rm -rf $(ISO)bin/
 	rm -rf $(ISO)sys/mod/core/
 	rm -rf $(ISO)sys/mod/init/
 
