@@ -31,7 +31,9 @@
         "algorithm": "cpp",
         "hash_map": "c",
         "string_view": "c",
-        "initializer_list": "c"
+        "initializer_list": "c",
+        "thread": "cpp",
+        "future": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "clang-tidy.compilerArgs": [

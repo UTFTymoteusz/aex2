@@ -34,7 +34,7 @@ all:
 
 ifndef CROSSGCCPATH
 	@echo x86_64-aex2-elf-gcc not found, skipping building any userspace binaries
-	@exit 0
+	exit 0
 endif
 
 	cd init  && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)sys/"
