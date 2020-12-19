@@ -16,6 +16,7 @@ format:
 	cd kernel && $(MAKE) format
 	cd libc   && $(MAKE) format
 	cd init   && $(MAKE) format
+	cd utest  && $(MAKE) format
 
 all:
 	mkdir -p "$(shell pwd)/$(ISO)"
@@ -33,21 +34,23 @@ all:
 
 ifndef CROSSGCCPATH
 	@echo x86_64-aex2-elf-gcc not found, skipping building any userspace binaries
-	@exit 0
+	exit 0
 endif
 
-	cd init && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)sys/"
+	cd init  && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)sys/"
+	cd utest && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)sys/"
 
 iso:
 	grub-mkrescue -o aex.iso $(ISO) 2> /dev/null
 
 runnet:
-	qemu-system-x86_64 -monitor stdio -machine type=q35 -smp 1 -m 32M -cdrom aex.iso \
+	qemu-system-x86_64 -monitor stdio -machine type=q35 -smp 4 -m 32M -cdrom aex.iso \
 	-netdev tap,id=net0,ifname=TAP -device rtl8139,netdev=net0,mac=00:01:e3:00:00:00 \
 	--enable-kvm
 	
 run:
 	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 1 -m 32M -cdrom aex.iso --enable-kvm
+	#qemu-system-x86_64 -monitor stdio -machine type=q35 -smp 4 -m 32M -cdrom aex.iso
 
 clean:
 	cd mod    && $(MAKE) clean
