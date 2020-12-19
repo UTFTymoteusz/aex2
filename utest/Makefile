@@ -15,7 +15,7 @@ HFILES    := $(shell find . -type f -name '*.h')
 ASMFILES  := $(shell find . -type f -name '*.asm')
 OBJS      := $(patsubst %.o, $(OBJ_DEST)%.o, $(CFILES:.c=.c.o) $(ASMFILES:.asm=.asm.o))
 
-BIN_OBJ = $(BIN)$(BIN_NAME).elf
+BIN_OBJ = $(BIN)$(BIN_NAME)
 
 GFLAGS = -O3 -pipe
 
