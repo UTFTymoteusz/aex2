@@ -1,3 +1,11 @@
+*
+!/**/
+!*.*
+!Makefile
+!.clang-format
+!.gitignore
+!.gitmodules
+
 **.d
 **.o
 **.iso
