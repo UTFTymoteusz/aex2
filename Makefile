@@ -44,16 +44,16 @@ endif
 	cd utest && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)sys/"
 
 iso:
-	grub-mkrescue -o aex.iso $(ISO)
+	grub-mkrescue -o /tmp/aex.iso $(ISO)
 
 runnet:
 	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 4 -m 32M \
-	-cdrom aex.iso --enable-kvm \
+	-cdrom /tmp/aex.iso --enable-kvm \
 	-netdev tap,id=net0,ifname=TAP -device rtl8139,netdev=net0,mac=00:01:e3:00:00:00 \
 	
 run:
-	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 2 -m 32M \
-	-cdrom aex.iso --enable-kvm
+	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 1 -m 32M \
+	-cdrom /tmp/aex.iso --enable-kvm
 
 clean:
 	cd mod    && $(MAKE) clean

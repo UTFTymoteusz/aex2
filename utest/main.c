@@ -9,6 +9,16 @@
 void test_kill();
 void test_mem();
 
+void test_segv(int id, struct siginfo_t* info, void* aaa) {
+    printf("segmentation fault (%i) @ 0x%p %i\n", id, info->si_addr, info->si_code);
+    sleep(2);
+}
+
+void test_ill(int id, struct siginfo_t* info, void* aaa) {
+    printf("illegal instruction (%i) @ 0x%p %i\n", id, info->si_addr, info->si_code);
+    sleep(2);
+}
+
 int main(int argc, char* argv[]) {
     char buffer[2048];
     getcwd(buffer, sizeof(buffer));
@@ -31,9 +41,29 @@ int main(int argc, char* argv[]) {
     FILE* tty = fopen("tty0", "r+");
     fwrite("menel\n", 6, 1, tty);
 
-    test_kill();
+    // test_kill();
     // test_mem();
     sleep(1);
+
+    struct sigaction actionA = {
+        .sa_sigaction = test_segv,
+        .sa_flags     = SA_SIGINFO,
+    };
+
+    sigaction(SIGSEGV, &actionA, NULL);
+
+    struct sigaction actionB = {
+        .sa_handler = SIG_DFL,
+        //.sa_sigaction = test_ill,
+        .sa_flags = 0,
+    };
+
+    sigaction(SIGILL, &actionB, NULL);
+
+    asm volatile("ud2");
+
+    int* dasda = (int*) 0x2323232323;
+    printf("%i\n", dasda[0]);
 
     return 0;
 }
@@ -52,6 +82,7 @@ void test_kill() {
     if (pid == 0) {
         struct sigaction action = {
             .sa_handler  = signal_entry,
+            .sa_flags    = SA_RESTORER,
             .sa_restorer = signal_restore,
         };
 

@@ -36,7 +36,9 @@
         "future": "cpp",
         "bitset": "cpp",
         "chrono": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "limits": "cpp",
+        "*.rh": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "clang-tidy.compilerArgs": [
