@@ -52,9 +52,10 @@
         "-Ilibc/",
         "-Ilibc/include/",
         "-Ikernel/",
-        "-Ikernel/arch/x64/",
-        "-Ikernel/arch/x64/include/",
+        "-Ikernel/arch/x86_64/",
+        "-Ikernel/arch/x86_64/include/",
         "-Ikernel/include/",
         "-checks=*",
     ],
+    "discord.enabled": false,
 }

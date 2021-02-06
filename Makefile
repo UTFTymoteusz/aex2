@@ -1,4 +1,4 @@
-ARCH ?= x64
+ARCH ?= x86_64
 
 ISO := iso/
 
@@ -47,9 +47,9 @@ iso:
 	grub-mkrescue -o /tmp/aex.iso $(ISO)
 
 runnet:
-	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 2 -m 32M \
+	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 1 -m 32M \
 	-cdrom /tmp/aex.iso --enable-kvm \
-	-netdev tap,id=net0,ifname=TAP -device rtl8139,netdev=net0,mac=00:01:e3:00:00:00 \
+	-netdev tap,id=net0,ifname=tap0 -device rtl8139,netdev=net0,mac=00:01:e3:00:00:00 \
 	
 run:
 	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 2 -m 32M \
