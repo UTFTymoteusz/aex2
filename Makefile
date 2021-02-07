@@ -23,6 +23,7 @@ all:
 	mkdir -p "$(shell pwd)/$(ISO)"
 	mkdir -p "$(shell pwd)/$(ISO)bin/"
 	mkdir -p "$(shell pwd)/$(ISO)boot/"
+	mkdir -p "$(shell pwd)/$(ISO)lib/"
 	mkdir -p "$(shell pwd)/$(ISO)sys/"
 	mkdir -p "$(shell pwd)/$(ISO)sys/mod/"
 	mkdir -p "$(shell pwd)/$(ISO)sys/mod/core/"
@@ -34,7 +35,7 @@ all:
 	cd kernel && $(MAKE) copy ROOT_DIR="$(ROOT_DIR)"
 
 ifneq (,$(wildcard $(CROSSGCCPATH)))
-	cd libc  && $(MAKE) all install ARCH="$(ARCH)"
+	cd libc  && $(MAKE) all copy install COPY_DIR="$(ROOT_DIR)lib/" ARCH="$(ARCH)"
 
 	cd bin   && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)bin/"
 	cd init  && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)sys/"
