@@ -38,7 +38,20 @@
         "chrono": "cpp",
         "random": "cpp",
         "limits": "cpp",
-        "*.rh": "cpp"
+        "*.rh": "cpp",
+        "unistd.h": "c",
+        "stdbool.h": "c",
+        "errno.h": "c",
+        "syscallids.h": "c",
+        "stdlib.h": "c",
+        "inet.h": "c",
+        "fcntl.h": "c",
+        "dirent.h": "c",
+        "in.h": "c",
+        "valarray": "c",
+        "ranges": "c",
+        "ctype.h": "c",
+        "stat.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "clang-tidy.compilerArgs": [
@@ -57,5 +70,5 @@
         "-Ikernel/include/",
         "-checks=*",
     ],
-    "discord.enabled": false,
+    "discord.enabled": true,
 }
