@@ -1,4 +1,6 @@
 #include <arpa/inet.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
 #include <sys/wait.h>
 
 #include <ctype.h>
@@ -24,6 +26,7 @@
 void test_file();
 void test_inet();
 void test_ctype();
+void test_fb();
 
 int main(int argc, char* argv[]) {
     if (argc >= 2) {
@@ -42,6 +45,7 @@ int main(int argc, char* argv[]) {
     test_file();
     test_inet();
     test_ctype();
+    test_fb();
 }
 
 void test_file() {
@@ -166,4 +170,46 @@ void test_ctype() {
     ASSERT(_toupper('z') == 'Z');
     ASSERT(_tolower('A') == 'a');
     ASSERT(_tolower('Z') == 'z');
+}
+
+double rando(double min, double max) {
+    return min + ((double) rand() / (double) RAND_MAX) * (max - min);
+}
+
+void rect(uint32_t* fb, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t rgb) {
+    if (x >= 1280 || y >= 720)
+        return;
+
+    if (x + width >= 1280)
+        width -= ((x + width) - 1280);
+
+    if (y + height >= 720)
+        height -= ((y + height) - 720);
+
+    for (int j = 0; j < height; j++)
+        for (int i = 0; i < width; i++)
+            fb[(y + j) * 1280 + x + i] = rgb;
+}
+
+void test_fb() {
+    ioctl(1, 0x01, 0x01);
+    printf("testA\n");
+
+    printf("tty res: %ix%ix%i (%i)\n", ioctl(1, 0x04), ioctl(1, 0x05), ioctl(1, 0x06),
+           ioctl(1, 0x07));
+
+    uint32_t* fb = (uint32_t*) mmap(NULL, ioctl(1, 0x07), PROT_READ | PROT_WRITE, 0, 1, 0);
+    if (!fb) {
+        perror("mmap failed");
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < 1280 * 720; i++)
+        fb[i] = rando(0x000000, 0xFFFFFF);
+
+    for (int i = 0; i < 1000; i++)
+        // rect(fb, rando(0, 1280), rando(0, 720), rando(0, 1280), rando(0, 720),
+        //     rando(0x000000, 0xFFFFFF));
+        rect(fb, rando(0, 1280), rando(0, 720), rando(0, 1280), rando(0, 720),
+             0x2b2b34 * rando(0.0, 1.0));
 }
