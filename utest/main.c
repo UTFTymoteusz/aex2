@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     test_file();
     test_inet();
     test_ctype();
-    test_fb();
+    // test_fb();
 }
 
 void test_file() {
@@ -208,8 +208,6 @@ void test_fb() {
         fb[i] = rando(0x000000, 0xFFFFFF);
 
     for (int i = 0; i < 1000; i++)
-        // rect(fb, rando(0, 1280), rando(0, 720), rando(0, 1280), rando(0, 720),
-        //     rando(0x000000, 0xFFFFFF));
         rect(fb, rando(0, 1280), rando(0, 720), rando(0, 1280), rando(0, 720),
              0x2b2b34 * rando(0.0, 1.0));
 }
