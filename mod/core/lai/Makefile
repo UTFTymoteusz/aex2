@@ -7,7 +7,7 @@ LD   = ld
 
 MKDIR = mkdir -p
 
-BIN  := bin/
+BIN      := /tmp/aex2/mod/$(MODULE_NAME)/
 DEP_DEST := $(BIN)dep/
 OBJ_DEST := $(BIN)obj/
 
