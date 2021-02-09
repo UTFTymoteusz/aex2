@@ -45,16 +45,16 @@ else
 endif
 
 iso:
-	grub-mkrescue -o /tmp/aex.iso $(ISO)
+	grub-mkrescue -o /tmp/aex2/aex.iso $(ISO)
 
 runnet:
 	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 1 -m 32M \
-	-cdrom /tmp/aex.iso --enable-kvm \
+	-cdrom /tmp/aex2/aex.iso --enable-kvm \
 	-netdev tap,id=net0,ifname=tap0 -device rtl8139,netdev=net0,mac=00:01:e3:00:00:00 \
 	
 run:
 	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 2 -m 32M \
-	-cdrom /tmp/aex.iso --enable-kvm
+	-cdrom /tmp/aex2/aex.iso --enable-kvm
 
 clean:
 	cd mod    && $(MAKE) clean

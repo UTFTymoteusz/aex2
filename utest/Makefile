@@ -6,7 +6,7 @@ LD = ld
 
 MKDIR = mkdir -p
 
-BIN  := bin/
+BIN      := /tmp/aex2/bin/$(BIN_NAME)/
 DEP_DEST := $(BIN)dep/
 OBJ_DEST := $(BIN)obj/
 
