@@ -13,3 +13,6 @@
 [submodule "bin"]
 	path = bin
 	url = https://github.com/UTFTymoteusz/aexubins2.git
+[submodule "utest"]
+	path = utest
+	url = https://github.com/UTFTymoteusz/utest
