@@ -28,6 +28,7 @@ all:
 	mkdir -p "$(shell pwd)/$(ISO)sys/mod/"
 	mkdir -p "$(shell pwd)/$(ISO)sys/mod/core/"
 	mkdir -p "$(shell pwd)/$(ISO)sys/mod/init/"
+	mkdir -p "$(shell pwd)/$(ISO)sys/sym/"
 	
 	cd mod    && $(MAKE) all KERNELMOD_DIR="$(KERNELMOD_DIR)" KERNEL_SRC="$(KERNEL_SRC)" ARCH="$(ARCH)"
 	cd kernel && $(MAKE) all -j 8 ROOT_DIR="$(ROOT_DIR)"      ARCH="$(ARCH)"
@@ -39,7 +40,7 @@ ifneq (,$(wildcard $(CROSSGCCPATH)))
 
 	cd bin   && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)bin/"
 	cd init  && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)sys/"
-	cd utest && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)sys/"
+	cd utest && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)sys/" CC="x86_64-aex2-elf-gcc"
 else
 	@echo x86_64-aex2-elf-gcc not found, skipping building any userspace binaries
 endif
@@ -48,12 +49,12 @@ iso:
 	grub-mkrescue -o /tmp/aex2/aex.iso $(ISO)
 
 runnet:
-	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 1 -m 32M \
+	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 2 -m 32M \
 	-cdrom /tmp/aex2/aex.iso --enable-kvm \
 	-netdev tap,id=net0,ifname=tap0 -device rtl8139,netdev=net0,mac=00:01:e3:00:00:00 \
 	
 run:
-	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 2 -m 32M \
+	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 2 -m 256M \
 	-cdrom /tmp/aex2/aex.iso --enable-kvm
 
 clean:
@@ -62,6 +63,7 @@ clean:
 	cd libc   && $(MAKE) clean
 	cd init   && $(MAKE) clean
 	cd bin    && $(MAKE) clean
+	cd utest  && $(MAKE) clean
 
 	rm -rf $(ISO)bin/
 	rm -rf $(ISO)sys/mod/core/
