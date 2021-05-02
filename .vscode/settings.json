@@ -82,7 +82,10 @@
         "*.h": "c",
         "*.cpp": "cpp",
         "*.c": "c",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "typeindex": "cpp",
+        "ranges": "cpp",
+        "variant": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "clang-tidy.compilerArgs": [
