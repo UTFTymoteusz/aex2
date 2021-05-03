@@ -54,7 +54,7 @@ runnet:
 	-netdev tap,id=net0,ifname=tap0 -device rtl8139,netdev=net0,mac=00:01:e3:00:00:00 \
 	
 run:
-	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 1 -m 5G \
+	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 2 -m 64M \
 	-cdrom /tmp/aex2/aex.iso --enable-kvm $(EXTRA_FLAGS)
 
 clean:
