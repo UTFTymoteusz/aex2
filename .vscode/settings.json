@@ -87,7 +87,13 @@
         "ranges": "cpp",
         "variant": "cpp",
         "codecvt": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "source_location": "cpp",
+        "csetjmp": "cpp",
+        "csignal": "cpp",
+        "any": "cpp",
+        "strstream": "cpp",
+        "cfenv": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "clang-tidy.compilerArgs": [

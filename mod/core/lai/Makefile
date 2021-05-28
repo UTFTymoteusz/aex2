@@ -68,7 +68,7 @@ all: $(OBJS)
 include $(shell find $(DEP_DEST) -type f -name *.d)
 
 copy:
-	@cp $(MODULE_OBJ) "$(COPY_DIR)"
+	@cp -u $(MODULE_OBJ) "$(COPY_DIR)"
 
 clean:
 	rm -rf $(BIN)

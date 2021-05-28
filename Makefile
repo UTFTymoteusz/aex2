@@ -6,7 +6,7 @@ ROOT_DIR      := $(shell pwd)/$(ISO)
 KERNELMOD_DIR := $(ROOT_DIR)sys/mod/core/
 INITMOD_DIR   := $(ROOT_DIR)sys/mod/init/
 
-CROSSGCCPATH := $(shell which x86_64-aex2-elf-gcc)
+CROSSGCCPATH := $(shell which x86_64-pc-aex2-gcc)
 KERNEL_SRC   := $(shell pwd)/kernel/
 
 .PHONY: iso
@@ -40,9 +40,9 @@ ifneq (,$(wildcard $(CROSSGCCPATH)))
 
 	cd bin   && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)bin/"
 	cd init  && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)sys/"
-	cd utest && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)sys/" CC="x86_64-aex2-elf-gcc"
+	cd utest && $(MAKE) all copy COPY_DIR="$(ROOT_DIR)sys/" CC="x86_64-pc-aex2-gcc"
 else
-	@echo x86_64-aex2-elf-gcc not found, skipping building any userspace binaries
+	@echo x86_64-pc-aex2-gcc not found, skipping building any userspace binaries
 endif
 
 iso:

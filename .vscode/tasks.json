@@ -4,9 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build all task run",
+            "label": "run",
             "type": "shell",
-            "command": "./.vscode/build_all_task_run",
+            "command": "make all iso; make run &",
             "group": {
                 "kind": "build",
                 "isDefault": true
