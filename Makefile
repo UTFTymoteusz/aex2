@@ -48,11 +48,23 @@ endif
 iso:
 	grub-mkrescue -o /tmp/aex2/aex.iso $(ISO)
 
+fat32:
+	./mkfat32.sh
+
+atftp:
+	cp -ru $(ISO)boot /srv/atftp/
+	cp -ru $(ISO)sys  /srv/atftp/
+
 runnet:
-	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 1 -m 32M \
+	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 1 -m 64M \
 	-cdrom /tmp/aex2/aex.iso --enable-kvm \
-	-netdev tap,id=net0,ifname=tap0 -device rtl8139,netdev=net0,mac=00:01:e3:00:00:00 \
+	-netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+	-device rtl8139,netdev=net0,mac=00:01:e3:00:02:00
 	
+runfat:
+	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 1 -m 64M \
+	-drive file=/tmp/aex2/aex.fat32.img,format=raw --enable-kvm
+
 run:
 	qemu-system-x86_64 -monitor stdio -debugcon /dev/stderr -machine type=q35 -smp 1 -m 64M \
 	-cdrom /tmp/aex2/aex.iso --enable-kvm $(EXTRA_FLAGS)
