@@ -21,7 +21,7 @@
             "includePath": [
                 "${workspaceFolder}/**"
             ],
-            "compilerPath": "/usr/bin/g++",
+            "compilerPath": "/usr/cross/aex2/bin/x86_64-pc-aex2-gcc",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "linux-gcc-x64",

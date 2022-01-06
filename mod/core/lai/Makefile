@@ -61,9 +61,9 @@ format:
 	clang-format -style=file -i ${CFILES} ${HFILES}
 
 all: $(OBJS)
-	echo $(OBJS)
 	@$(MKDIR) $(BIN)
 	@$(LD) -r -o $(MODULE_OBJ) $(OBJS)
+	@printf '\033[0;95m%-10s\033[0m: Done building\033[0K\n' $(MODULE_NAME)
 
 include $(shell find $(DEP_DEST) -type f -name *.d)
 
@@ -76,9 +76,11 @@ clean:
 $(OBJ_DEST)%.cpp.o : %.cpp
 	@$(MKDIR) ${@D}
 	@$(MKDIR) $(dir $(DEP_DEST)$*)
-	$(CXX) $(CXXFLAGS) -c $< -o $@ -MMD -MT $@ -MF $(DEP_DEST)$*.cpp.d
+	@$(CXX) $(CXXFLAGS) -c $< -o $@ -MMD -MT $@ -MF $(DEP_DEST)$*.cpp.d
 
 $(OBJ_DEST)%.c.o : %.c
 	@$(MKDIR) ${@D}
 	@$(MKDIR) $(dir $(DEP_DEST)$*)
-	$(CC) $(LAI_CCFLAGS) -c $< -o $@ -MMD -MT $@ -MF $(DEP_DEST)$*.c.d
+
+	@printf '\033[0;95m$(MODULE_NAME)\033[0m: Building \033[0;95m$(<)\033[0m\033[0K\r'
+	@$(CC) $(LAI_CCFLAGS) -c $< -o $@ -MMD -MT $@ -MF $(DEP_DEST)$*.c.d
