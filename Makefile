@@ -14,6 +14,8 @@ RAM   := 64M
 
 DEBUG := 1
 
+.PHONY: iso
+
 all:
 	@mkdir -p "$(shell pwd)/$(ISO)"
 	@mkdir -p "$(shell pwd)/$(ISO)bin/"
