@@ -28,7 +28,7 @@ all:
 	@mkdir -p "$(shell pwd)/$(ISO)sys/mod/init/"
 	@mkdir -p "$(shell pwd)/$(ISO)sys/sym/"
 	
-	@cd mod     && $(MAKE) -s all KERNELMOD_DIR="$(KERNELMOD_DIR)" KERNEL_SRC="$(KERNEL_SRC)" ARCH="$(ARCH)" DEBUG="$(DEBUG)"
+	@cd mod     && $(MAKE) -s all INITMOD_DIR="$(INITMOD_DIR)" KERNELMOD_DIR="$(KERNELMOD_DIR)" KERNEL_SRC="$(KERNEL_SRC)" ARCH="$(ARCH)" DEBUG="$(DEBUG)"
 	@cd kernel  && $(MAKE) -s all -j 8 ROOT_DIR="$(ROOT_DIR)"      ARCH="$(ARCH)" DEBUG="$(DEBUG)"
 	
 	@cd kernel  && $(MAKE) -s copy ROOT_DIR="$(ROOT_DIR)"
