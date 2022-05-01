@@ -3,7 +3,7 @@ format:
 	
 all:
 	@$(foreach dir, $(wildcard */), cd $(dir) && $(MAKE) all -j 8 ARCH="$(ARCH)" DEBUG="$(DEBUG)" && cd ..;)
-	@$(foreach dir, $(wildcard */), cd $(dir) && $(MAKE) copy COPY_DIR="$(KERNELMOD_DIR)" && cd ..;)
+	@$(foreach dir, $(wildcard */), cd $(dir) && $(MAKE) copy COPY_DIR="$(INITMOD_DIR)" && cd ..;)
 
 clean:
 	$(foreach dir, $(wildcard */), cd $(dir) && $(MAKE) clean && cd ..;)

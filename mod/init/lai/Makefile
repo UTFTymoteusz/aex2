@@ -1,5 +1,4 @@
-MODULE_NAME  = lai
-MODULE_ORDER = 00
+MODULE_NAME = lai
 
 CXX ?= g++
 CC  ?= gcc
@@ -21,7 +20,7 @@ OBJS      := $(patsubst %.o, $(OBJ_DEST)%.o, $(CXXFILES:.cpp=.cpp.o))
 
 OBJS := $(OBJS) $(LAI_OBJS)
 
-MODULE_OBJ = $(BIN)$(MODULE_NAME).$(MODULE_ORDER).km
+MODULE_OBJ = $(BIN)$(MODULE_NAME).km
 
 GFLAGS = -O3 -Wall -Wextra -nostdlib -pipe
 
