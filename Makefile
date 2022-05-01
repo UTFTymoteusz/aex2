@@ -39,7 +39,6 @@ ifneq (,$(wildcard $(CROSSGCCPATH)))
 	@cd bin     && $(MAKE) -s all copy COPY_DIR="$(ROOT_DIR)bin/" CC="x86_64-pc-aex2-gcc"
 	@cd init    && $(MAKE) -s all copy COPY_DIR="$(ROOT_DIR)sys/" CC="x86_64-pc-aex2-gcc"
 	@cd utest   && $(MAKE) -s all copy COPY_DIR="$(ROOT_DIR)sys/" CC="x86_64-pc-aex2-gcc"
-	@cd manbong && $(MAKE) -s all copy COPY_DIR="$(ROOT_DIR)bin/" CC="x86_64-pc-aex2-gcc"
 else
 	@echo x86_64-pc-aex2-gcc not found, skipping building any userspace binaries
 endif
@@ -79,7 +78,6 @@ clean:
 	@cd init    && $(MAKE) -s clean
 	@cd bin     && $(MAKE) -s clean
 	@cd utest   && $(MAKE) -s clean
-	@cd manbong && $(MAKE) -s clean
 
 	rm -rf $(ISO)bin/
 	rm -rf $(ISO)sys/mod/core/
